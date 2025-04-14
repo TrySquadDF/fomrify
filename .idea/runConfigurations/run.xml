@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="run" type="GoApplicationRunConfiguration" factoryName="Go Application">
+    <module name="kurs-web" />
+    <working_directory value="$PROJECT_DIR$/apps/api-gql/" />
+    <kind value="FILE" />
+    <package value="github.com/TrySquadDF/formify/api-gql" />
+    <directory value="$PROJECT_DIR$" />
+    <filePath value="$PROJECT_DIR$/apps/api-gql/cmd/main.go" />
+    <method v="2" />
+  </configuration>
+</component>
