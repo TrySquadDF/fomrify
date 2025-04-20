@@ -10,4 +10,12 @@ type Deps struct {
 	fx.In
 }
 
-type Resolver struct{}
+type Resolver struct {
+	deps Deps
+}
+
+func New(deps Deps) (*Resolver, error) {
+	return &Resolver{
+		deps: deps,
+	}, nil
+}

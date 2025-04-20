@@ -1,0 +1,20 @@
+# Node.js
+node_modules/
+build/
+dist/
+
+# Credentials/Secrets
+*.env
+*.pem
+
+# Logs
+*.log
+
+.DS_STORE
+.bin
+.out
+
+vite.config.ts.timestamp-*.mjs
+
+.turbo
+.pnpm-debug.log
