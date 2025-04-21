@@ -1,5 +1,5 @@
 extend type Query {
-    ping: Ping!
+    ping: Ping! @isAuthenticated
 }
 
 type Ping {

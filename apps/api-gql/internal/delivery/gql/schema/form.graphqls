@@ -1,0 +1,112 @@
+# Enums
+enum FormAccess {
+  PRIVATE
+  BY_LINK
+  PUBLIC
+}
+
+enum QuestionType {
+  SHORT_TEXT
+  PARAGRAPH
+  BOOLEAN
+  NUMBER
+  PHONE
+  DATE
+  EMAIL
+  SINGLE_CHOICE
+  MULTIPLE_CHOICE
+}
+
+# Types
+type Form {
+  id: ID!
+  ownerId: ID!
+  title: String!
+  description: String
+  access: FormAccess!
+  createdAt: String!
+  updatedAt: String!
+  questions: [Question!]
+}
+
+type Question {
+  id: ID!
+  formId: ID!
+  text: String!
+  type: QuestionType!
+  required: Boolean!
+  order: Int!
+  options: [Option!]
+}
+
+type Option {
+  id: ID!
+  questionId: ID!
+  text: String!
+  order: Int!
+}
+
+# Inputs
+input OptionInput {
+  text: String!
+  order: Int!
+}
+
+input QuestionInput {
+  text: String!
+  type: QuestionType!
+  required: Boolean!
+  order: Int!
+  options: [OptionInput!]
+}
+
+input FormInput {
+  title: String!
+  description: String
+  access: FormAccess = PRIVATE
+  questions: [QuestionInput!]
+}
+
+input FormUpdateInput {
+  title: String
+  description: String
+  access: FormAccess
+  questions: [QuestionInput!]
+}
+
+input QuestionUpdateInput {
+  text: String
+  type: QuestionType
+  required: Boolean
+  order: Int
+  options: [OptionInput!]
+}
+
+input OptionUpdateInput {
+  text: String
+  order: Int
+}
+
+# Query and Mutation extensions
+extend type Query {
+  # Get a specific form by ID
+  form(id: ID!): Form
+  
+  # Get all forms with optional filtering
+  forms(ownerId: ID, access: FormAccess): [Form!]!
+}
+
+extend type Mutation {
+  # Form operations
+  createForm(input: FormInput!): Form! @isAuthenticated
+  updateForm(id: ID!, input: FormUpdateInput!): Form! @isAuthenticated
+  deleteForm(id: ID!): Boolean! @isAuthenticated
+  
+  # Question operations (no creation - only as part of form)
+  updateQuestion(id: ID!, input: QuestionUpdateInput!): Question! @isAuthenticated
+  deleteQuestion(id: ID!): Boolean! @isAuthenticated
+  
+  # Option operations (no creation - only as part of question)
+  updateOption(id: ID!, input: OptionUpdateInput!): Option! @isAuthenticated
+  deleteOption(id: ID!): Boolean! @isAuthenticated
+}

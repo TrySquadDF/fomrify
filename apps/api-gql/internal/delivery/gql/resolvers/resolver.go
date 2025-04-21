@@ -1,6 +1,10 @@
 package resolvers
 
-import "go.uber.org/fx"
+import (
+	"github.com/TrySquadDF/formify/api-gql/internal/auth"
+	"go.uber.org/fx"
+	"gorm.io/gorm"
+)
 
 // This file will not be regenerated automatically.
 //
@@ -8,6 +12,9 @@ import "go.uber.org/fx"
 
 type Deps struct {
 	fx.In
+
+	Sessions             *auth.Auth
+	Gorm                 *gorm.DB
 }
 
 type Resolver struct {

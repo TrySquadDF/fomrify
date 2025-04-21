@@ -1,3 +1,5 @@
 type Query
-#type Mutation
-#type Subscription
+type Mutation
+# type Subscription
+
+directive @isAuthenticated on FIELD_DEFINITION

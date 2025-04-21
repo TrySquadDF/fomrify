@@ -2,10 +2,185 @@
 
 package gqlmodel
 
+import (
+	"fmt"
+	"io"
+	"strconv"
+)
+
+type Form struct {
+	ID          string      `json:"id"`
+	OwnerID     string      `json:"ownerId"`
+	Title       string      `json:"title"`
+	Description *string     `json:"description,omitempty"`
+	Access      FormAccess  `json:"access"`
+	CreatedAt   string      `json:"createdAt"`
+	UpdatedAt   string      `json:"updatedAt"`
+	Questions   []*Question `json:"questions,omitempty"`
+}
+
+type FormInput struct {
+	Title       string           `json:"title"`
+	Description *string          `json:"description,omitempty"`
+	Access      *FormAccess      `json:"access,omitempty"`
+	Questions   []*QuestionInput `json:"questions,omitempty"`
+}
+
+type FormUpdateInput struct {
+	Title       *string          `json:"title,omitempty"`
+	Description *string          `json:"description,omitempty"`
+	Access      *FormAccess      `json:"access,omitempty"`
+	Questions   []*QuestionInput `json:"questions,omitempty"`
+}
+
+type Mutation struct {
+}
+
+type Option struct {
+	ID         string `json:"id"`
+	QuestionID string `json:"questionId"`
+	Text       string `json:"text"`
+	Order      int32  `json:"order"`
+}
+
+type OptionInput struct {
+	Text  string `json:"text"`
+	Order int32  `json:"order"`
+}
+
+type OptionUpdateInput struct {
+	Text  *string `json:"text,omitempty"`
+	Order *int32  `json:"order,omitempty"`
+}
+
 type Ping struct {
 	Timestamp string `json:"timestamp"`
 	Message   string `json:"message"`
 }
 
 type Query struct {
+}
+
+type Question struct {
+	ID       string       `json:"id"`
+	FormID   string       `json:"formId"`
+	Text     string       `json:"text"`
+	Type     QuestionType `json:"type"`
+	Required bool         `json:"required"`
+	Order    int32        `json:"order"`
+	Options  []*Option    `json:"options,omitempty"`
+}
+
+type QuestionInput struct {
+	Text     string         `json:"text"`
+	Type     QuestionType   `json:"type"`
+	Required bool           `json:"required"`
+	Order    int32          `json:"order"`
+	Options  []*OptionInput `json:"options,omitempty"`
+}
+
+type QuestionUpdateInput struct {
+	Text     *string        `json:"text,omitempty"`
+	Type     *QuestionType  `json:"type,omitempty"`
+	Required *bool          `json:"required,omitempty"`
+	Order    *int32         `json:"order,omitempty"`
+	Options  []*OptionInput `json:"options,omitempty"`
+}
+
+type FormAccess string
+
+const (
+	FormAccessPrivate FormAccess = "PRIVATE"
+	FormAccessByLink  FormAccess = "BY_LINK"
+	FormAccessPublic  FormAccess = "PUBLIC"
+)
+
+var AllFormAccess = []FormAccess{
+	FormAccessPrivate,
+	FormAccessByLink,
+	FormAccessPublic,
+}
+
+func (e FormAccess) IsValid() bool {
+	switch e {
+	case FormAccessPrivate, FormAccessByLink, FormAccessPublic:
+		return true
+	}
+	return false
+}
+
+func (e FormAccess) String() string {
+	return string(e)
+}
+
+func (e *FormAccess) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = FormAccess(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid FormAccess", str)
+	}
+	return nil
+}
+
+func (e FormAccess) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type QuestionType string
+
+const (
+	QuestionTypeShortText      QuestionType = "SHORT_TEXT"
+	QuestionTypeParagraph      QuestionType = "PARAGRAPH"
+	QuestionTypeBoolean        QuestionType = "BOOLEAN"
+	QuestionTypeNumber         QuestionType = "NUMBER"
+	QuestionTypePhone          QuestionType = "PHONE"
+	QuestionTypeDate           QuestionType = "DATE"
+	QuestionTypeEmail          QuestionType = "EMAIL"
+	QuestionTypeSingleChoice   QuestionType = "SINGLE_CHOICE"
+	QuestionTypeMultipleChoice QuestionType = "MULTIPLE_CHOICE"
+)
+
+var AllQuestionType = []QuestionType{
+	QuestionTypeShortText,
+	QuestionTypeParagraph,
+	QuestionTypeBoolean,
+	QuestionTypeNumber,
+	QuestionTypePhone,
+	QuestionTypeDate,
+	QuestionTypeEmail,
+	QuestionTypeSingleChoice,
+	QuestionTypeMultipleChoice,
+}
+
+func (e QuestionType) IsValid() bool {
+	switch e {
+	case QuestionTypeShortText, QuestionTypeParagraph, QuestionTypeBoolean, QuestionTypeNumber, QuestionTypePhone, QuestionTypeDate, QuestionTypeEmail, QuestionTypeSingleChoice, QuestionTypeMultipleChoice:
+		return true
+	}
+	return false
+}
+
+func (e QuestionType) String() string {
+	return string(e)
+}
+
+func (e *QuestionType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = QuestionType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid QuestionType", str)
+	}
+	return nil
+}
+
+func (e QuestionType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }

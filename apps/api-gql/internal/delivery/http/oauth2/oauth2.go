@@ -1,10 +1,9 @@
 package oauth2
 
 import (
-	"encoding/json"
-	"log"
 	"net/http"
 
+	"github.com/TrySquadDF/formify/api-gql/internal/auth"
 	"github.com/TrySquadDF/formify/api-gql/internal/delivery/gql/resolvers"
 	"github.com/TrySquadDF/formify/api-gql/internal/entity"
 	"github.com/TrySquadDF/formify/api-gql/internal/server"
@@ -21,6 +20,7 @@ type GoogleOpts struct {
 	UserService *users.Service
 	Resolver    *resolvers.Resolver
 	Server      *server.Server
+	Auth        *auth.Auth 
 }
 
 func New(opts GoogleOpts, cfg config.Config, gcfg google.GoogleConfig) {
@@ -57,28 +57,27 @@ func New(opts GoogleOpts, cfg config.Config, gcfg google.GoogleConfig) {
 		}
 
 		if user == nil {
-			newuser, err := opts.UserService.CreateUser(ctx.Request.Context(), entity.Users{
+			newUser, err := opts.UserService.CreateUser(ctx.Request.Context(), entity.Users{
 				Email:       ud.Email,
 				DisplayName: ud.Name,
 				Picture:     ud.Picture,
 				GoogleID:    ud.Sub,
 			})
 			if err != nil {
-				log.Println(err)
 				ctx.String(http.StatusInternalServerError, "Failed to create user")
 				return
 			}
 
-			log.Println(newuser)
+			user = newUser
 		}
+		
 
-		data, err := json.Marshal(user)
-		if err != nil {
-			return
-		}
+		opts.Auth.Put(ctx.Request.Context(), "dbUser", *user)
+		ctx.Redirect(http.StatusTemporaryRedirect, cfg.SiteBaseUrl)
+	})
 
-		log.Println(string(data))
-
+	opts.Server.GET("/logout", func(ctx *gin.Context) {
+		opts.Auth.SessionLogout(ctx.Request.Context())
 		ctx.Redirect(http.StatusTemporaryRedirect, cfg.SiteBaseUrl)
 	})
 }

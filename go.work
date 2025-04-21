@@ -3,7 +3,6 @@ go 1.24.0
 use (
 	./apps/api-gql
 	./lib/gomodels
-	./lib/repositories
 	./lib/config
 	./lib/google
 	./lib/migrations

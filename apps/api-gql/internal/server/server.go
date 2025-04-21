@@ -4,6 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/TrySquadDF/formify/api-gql/internal/auth"
+	"github.com/TrySquadDF/formify/api-gql/internal/server/gincontext"
+	"github.com/TrySquadDF/formify/api-gql/internal/server/middleware"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/fx"
 )
@@ -11,6 +14,9 @@ import (
 type Opts struct {
 	fx.In
 	LC fx.Lifecycle
+
+	Sessions           *auth.Auth
+	Middlewares        *middleware.Middleware
 }
 
 type Server struct {
@@ -18,10 +24,15 @@ type Server struct {
 }
 
 func New(opts Opts) *Server {
-	inst := gin.New()
+	s := gin.New()
 	srv := &Server{
-		inst,
+		s,
 	}
+
+	s.Use(gin.Logger())
+
+	s.Use(opts.Sessions.Middleware())
+	s.Use(gincontext.Middleware())
 
 	opts.LC.Append(
 		fx.Hook{

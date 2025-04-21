@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/TrySquadDF/formify/api-gql/internal/server/middleware"
 	"github.com/TrySquadDF/formify/api-gql/internal/services/tokens"
 	"github.com/jackc/pgx/v5/pgxpool"
 
@@ -15,15 +16,11 @@ import (
 
 	"github.com/TrySquadDF/formify/api-gql/internal/auth"
 	"github.com/TrySquadDF/formify/api-gql/internal/delivery/gql"
+	"github.com/TrySquadDF/formify/api-gql/internal/delivery/gql/directives"
 	"github.com/TrySquadDF/formify/api-gql/internal/delivery/gql/resolvers"
 	"github.com/TrySquadDF/formify/api-gql/internal/delivery/http/oauth2"
 	"github.com/TrySquadDF/formify/api-gql/internal/server"
 
-	tokensrepository "github.com/TrySquadDF/formify/lib/repositories/tokens"
-	tokensrepositorypgx "github.com/TrySquadDF/formify/lib/repositories/tokens/pgx"
-
-	usersrepository "github.com/TrySquadDF/formify/lib/repositories/users"
-	usersrepositorypgx "github.com/TrySquadDF/formify/lib/repositories/users/pgx"
 	"github.com/redis/go-redis/extra/redisotel/v9"
 	"github.com/redis/go-redis/v9"
 	"github.com/uptrace/opentelemetry-go-extra/otelgorm"
@@ -107,16 +104,6 @@ func newPgxPool(cfg config.Config) (*pgxpool.Pool, error) {
 func main() {
 	app := fx.New(
 		fx.Provide(
-			fx.Annotate(
-				usersrepositorypgx.NewFx,
-				fx.As(new(usersrepository.Repository)),
-			),
-			fx.Annotate(
-				tokensrepositorypgx.NewFx,
-				fx.As(new(tokensrepository.Repository)),
-			),
-		),
-		fx.Provide(
 			users.New,
 			tokens.New,
 		),
@@ -126,6 +113,8 @@ func main() {
 			newRedis,
 			newPgxPool,
 			google.NewOAuth2Config,
+			directives.New,
+			middleware.New,
 			auth.NewSessions,
 			resolvers.New,
 			server.New,

@@ -2,17 +2,12 @@ package users
 
 import (
 	"context"
-	"log"
 
 	"github.com/TrySquadDF/formify/api-gql/internal/entity"
-	"gorm.io/gorm"
-
 	"github.com/TrySquadDF/formify/api-gql/internal/services/tokens"
-
 	gomodel "github.com/TrySquadDF/formify/lib/gomodels"
-
-	"github.com/TrySquadDF/formify/lib/repositories/users/model"
 	"go.uber.org/fx"
+	"gorm.io/gorm"
 )
 
 type Opts struct {
@@ -38,27 +33,22 @@ func (c *Service) FindByGoogleID(ctx context.Context, googleID string) (*gomodel
     result := c.database.Preload("Token").Where("\"googleId\" = ?", googleID).First(&user)
     
     if result.Error != nil {
-        // Check if it's just a "record not found" error
         if result.Error == gorm.ErrRecordNotFound {
-            // Return nil, nil to indicate user not found (or another custom error if preferred)
             return nil, nil
         }
-        // For other DB errors, return the error
         return nil, result.Error
     }
     
-    // User found, log token ID and return user
-    log.Println(user.Token.ID)
     return &user, nil
 }
 
-func (c *Service) CreateUser(ctx context.Context, user entity.Users) (*model.Users, error) {
+func (c *Service) CreateUser(ctx context.Context, user entity.Users) (*gomodel.Users, error) {
     tokens, err := c.tokensService.Create(ctx, user.ID)
     if err != nil {
         return nil, err
     }
     
-    userModel := &model.Users{
+    userModel := &gomodel.Users{
         ID:        user.ID,
         Email:     user.Email,
         DisplayName: user.DisplayName,

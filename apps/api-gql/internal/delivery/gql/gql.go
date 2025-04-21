@@ -5,6 +5,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/TrySquadDF/formify/api-gql/internal/delivery/gql/directives"
 	"github.com/TrySquadDF/formify/api-gql/internal/delivery/gql/graph"
 	"github.com/TrySquadDF/formify/api-gql/internal/delivery/gql/resolvers"
 	"github.com/TrySquadDF/formify/api-gql/internal/server"
@@ -15,6 +16,7 @@ import (
 type Opts struct {
 	fx.In
 
+	Directives              *directives.Directives
 	Resolver *resolvers.Resolver
 	Server   *server.Server
 }
@@ -24,6 +26,8 @@ func New(opts Opts) *handler.Server {
 		Resolvers: opts.Resolver,
 	}
 	
+
+	graphConfig.Directives.IsAuthenticated = opts.Directives.IsAuthenticated
 	schema := graph.NewExecutableSchema(graphConfig)
 	srv := handler.New(schema)
 
