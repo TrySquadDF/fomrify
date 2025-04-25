@@ -1,0 +1,18 @@
+type User {
+    # "id": "d72901ec-b313-44a0-8418-ba2585b19b40",
+    # "email": "trysquad06@gmail.com",
+    # "displayName": "Trysquad",
+    # "picture": "https://lh3.googleusercontent.com/a/ACg8ocLwl6xtLMB3YmaSVFvxKocMza-fxvuuSgGDiecRvCl6Veszog=s96-c",
+    # "googleId": "107353508950045471942",
+    id: ID!
+    email: String!
+    displayName: String!
+    picture: String!
+    googleId: String!
+    isBanned: Boolean!
+    forms: [Form!]!
+}
+
+extend type Query {
+    me: User! @isAuthenticated
+}

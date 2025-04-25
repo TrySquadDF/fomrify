@@ -26,7 +26,7 @@ type GoogleOpts struct {
 func New(opts GoogleOpts, cfg config.Config, gcfg google.GoogleConfig) {
 	opts.Server.GET("/google/login", gcfg.AutharizationHandler)
 
-	opts.Server.GET("/auth/google/callback", func(ctx *gin.Context) {
+	opts.Server.GET("/google/callback", func(ctx *gin.Context) {
 		code := ctx.Query("code")
 
 		token, err := gcfg.Exchange(ctx.Request.Context(), code)
@@ -73,7 +73,12 @@ func New(opts GoogleOpts, cfg config.Config, gcfg google.GoogleConfig) {
 		
 
 		opts.Auth.Put(ctx.Request.Context(), "dbUser", *user)
-		ctx.Redirect(http.StatusTemporaryRedirect, cfg.SiteBaseUrl)
+		ctx.Redirect(http.StatusTemporaryRedirect, "https://localhost:3000")
+	})
+
+	opts.Server.GET("/auth/check", func(ctx *gin.Context) {
+		user := opts.Auth.Get(ctx.Request.Context(), "dbUser")
+		ctx.JSON(http.StatusOK, gin.H{"authenticated": true, "user": user})
 	})
 
 	opts.Server.GET("/logout", func(ctx *gin.Context) {

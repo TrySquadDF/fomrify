@@ -64,7 +64,6 @@ func NewOAuth2Config(cfg config.Config) GoogleConfig {
 
 func (cfg *GoogleConfig) AutharizationHandler(c *gin.Context) {
 	state := uuid.New().String()
-	// Store state in session/cookie for validation
 	url := cfg.AuthCodeURL(state)
 	c.Redirect(http.StatusTemporaryRedirect, url)
 } 

@@ -7,6 +7,7 @@ import (
 	"github.com/TrySquadDF/formify/api-gql/internal/auth"
 	"github.com/TrySquadDF/formify/api-gql/internal/server/gincontext"
 	"github.com/TrySquadDF/formify/api-gql/internal/server/middleware"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/fx"
 )
@@ -30,6 +31,18 @@ func New(opts Opts) *Server {
 	}
 
 	s.Use(gin.Logger())
+
+	s.Use(
+		cors.New(
+			cors.Config{
+				AllowOrigins:     []string{"http://localhost:3000", "https://localhost:3000"}, 
+				AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+				AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+				ExposeHeaders:    []string{"Content-Length"},
+				AllowCredentials: true,
+			},
+		),
+	)
 
 	s.Use(opts.Sessions.Middleware())
 	s.Use(gincontext.Middleware())

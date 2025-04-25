@@ -26,7 +26,7 @@ func (c *Config) GetGoogleCallbackUrl() string {
 		panic(err)
 	}
 
-	return u.JoinPath("/auth/google/callback").String()
+	return u.JoinPath("/google/callback").String()
 }
 
 func NewWithEnvPath(envPath string) (*Config, error) {

@@ -1,0 +1,48 @@
+# Входные данные для ответа на вопрос
+input AnswerInput {
+  questionId: ID!
+  textValue: String
+  boolValue: Boolean
+  numberValue: Float
+  dateValue: DateTime
+  optionIds: [ID!]
+}
+
+# Входные данные для отправки формы
+input FormResponseInput {
+  formId: ID!
+  answers: [AnswerInput!]!
+}
+
+# Типы для ответов
+type Answer {
+  id: ID!
+  questionId: ID!
+  question: Question
+  textValue: String
+  boolValue: Boolean
+  numberValue: Float
+  dateValue: DateTime
+  selectedOptions: [Option!]
+}
+
+type FormResponse {
+  id: ID!
+  formId: ID!
+  form: Form
+  createdAt: DateTime!
+  answers: [Answer!]!
+}
+
+# Добавляем в Mutation
+extend type Mutation {
+  # Отправка ответов на форму
+  submitFormResponse(input: FormResponseInput!): FormResponse!
+}
+
+# Добавляем в Query
+extend type Query {
+  # Получение ответов на форму (только для владельца)
+  formResponses(formId: ID!): [FormResponse!]! @isAuthenticated
+  formResponse(id: ID!): FormResponse @isAuthenticated
+}

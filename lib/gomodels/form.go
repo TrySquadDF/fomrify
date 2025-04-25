@@ -51,8 +51,8 @@ type Question struct {
     Text      string       `gorm:"column:text;type:text" json:"text"`
     Type      QuestionType `gorm:"column:type;type:varchar(32)" json:"type"`
     Required  bool         `gorm:"column:required;default:false" json:"required"`
-    Order     int          `gorm:"column:order" json:"order"`
-    Options   []Option     `gorm:"foreignKey:QuestionID" json:"options,omitempty"` // для single/multiple choice
+    Order     int32         `gorm:"column:order" json:"order"`
+    Options   []*Option     `gorm:"foreignKey:QuestionID" json:"options,omitempty"` // для single/multiple choice
 }
 
 func (Question) TableName() string {
@@ -64,7 +64,7 @@ type Option struct {
     ID         string `gorm:"column:id;primaryKey;type:uuid;default:gen_random_uuid()" json:"id"`
     QuestionID string `gorm:"column:question_id;type:uuid;not null;index" json:"questionId"`
     Text       string `gorm:"column:text;type:text" json:"text"`
-    Order      int    `gorm:"column:order" json:"order"`
+    Order      int32    `gorm:"column:order" json:"order"`
 }
 
 func (Option) TableName() string {

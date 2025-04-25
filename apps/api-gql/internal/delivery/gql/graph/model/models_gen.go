@@ -12,7 +12,7 @@ type Form struct {
 	ID          string      `json:"id"`
 	OwnerID     string      `json:"ownerId"`
 	Title       string      `json:"title"`
-	Description *string     `json:"description,omitempty"`
+	Description string      `json:"description"`
 	Access      FormAccess  `json:"access"`
 	CreatedAt   string      `json:"createdAt"`
 	UpdatedAt   string      `json:"updatedAt"`
@@ -85,6 +85,16 @@ type QuestionUpdateInput struct {
 	Required *bool          `json:"required,omitempty"`
 	Order    *int32         `json:"order,omitempty"`
 	Options  []*OptionInput `json:"options,omitempty"`
+}
+
+type User struct {
+	ID          string  `json:"id"`
+	Email       string  `json:"email"`
+	DisplayName string  `json:"displayName"`
+	Picture     string  `json:"picture"`
+	GoogleID    string  `json:"googleId"`
+	IsBanned    bool    `json:"isBanned"`
+	Forms       []*Form `json:"forms"`
 }
 
 type FormAccess string

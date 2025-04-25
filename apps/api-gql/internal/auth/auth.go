@@ -76,6 +76,10 @@ func (s *Auth) Middleware() gin.HandlerFunc {
 	}
 }
 
+func (s *Auth) Get(ctx context.Context, key string) interface{} {
+    return s.sessionManager.Get(ctx, key)
+}
+
 func (s *Auth) Put(ctx context.Context, key string, val interface{}) {
 	s.sessionManager.Put(ctx, key, val)
 	s.sessionManager.Commit(ctx)
