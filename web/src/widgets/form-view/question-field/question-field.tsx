@@ -22,7 +22,6 @@ import flags from "react-phone-number-input/flags";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
-// --- Helper Components ---
 
 // Memoized Label Component for reusability and performance
 const MemoizedFormLabel = React.memo(({ text, required, htmlFor }: { text: string; required?: boolean; htmlFor?: string }) => (
@@ -32,7 +31,6 @@ const MemoizedFormLabel = React.memo(({ text, required, htmlFor }: { text: strin
 ));
 MemoizedFormLabel.displayName = 'MemoizedFormLabel';
 
-// --- Input Type Components ---
 // These components render the actual input element and associated logic.
 
 const ShortTextInput = React.memo(({ field }: { field: ControllerRenderProps<FieldValues, string> }) => (
@@ -63,6 +61,7 @@ const NumberInput = React.memo(({ field }: { field: ControllerRenderProps<FieldV
   />
 ));
 NumberInput.displayName = 'NumberInput';
+
 type CustomPhoneInputProps = Omit<
   React.InputHTMLAttributes<HTMLInputElement>, // Use standard HTML Input attributes
   "onChange" | "value" | "ref" // Omit conflicting props
@@ -71,6 +70,20 @@ type CustomPhoneInputProps = Omit<
     onChange?: (value: RPNInput.Value | undefined) => void; // Allow undefined for onChange type
     value?: RPNInput.Value | undefined; // Allow undefined for value type
   };
+
+
+  const PhoneInputWrapper = React.memo(({ field }: { field: ControllerRenderProps<FieldValues, string> }) => {
+    return (
+      <PhoneInput
+        value={field.value}
+        onChange={(value) => {
+          field.onChange(value || "");
+        }}
+        international
+      />
+    );
+  });
+  PhoneInputWrapper.displayName = 'PhoneInputWrapper';
 
 // Use React.ComponentRef instead of the deprecated React.ElementRef
 const PhoneInput: React.ForwardRefExoticComponent<CustomPhoneInputProps> =
@@ -328,7 +341,7 @@ const QuestionInputComponents: Record<QuestionType, React.ComponentType<any>> = 
   [QuestionType.Paragraph]: ParagraphInput,
   [QuestionType.Boolean]: BooleanInput,
   [QuestionType.Number]: NumberInput,
-  [QuestionType.Phone]: PhoneInput,
+  [QuestionType.Phone]: PhoneInputWrapper,
   [QuestionType.Date]: DateInput,
   [QuestionType.Email]: EmailInput,
   [QuestionType.SingleChoice]: SingleChoiceInput,

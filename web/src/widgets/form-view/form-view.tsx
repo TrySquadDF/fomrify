@@ -1,7 +1,7 @@
 'use client';
 
 import { Form as GQLForm, Question, QuestionType } from "@/src/gql/graphql";
-import React, { useState, useMemo, useCallback } from "react"; 
+import React, { useMemo, useCallback } from "react"; 
 import { Button } from "@/components/ui/button";
 import { CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -10,8 +10,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, UseFormReturn } from "react-hook-form";
 import { isValidPhoneNumber } from 'react-phone-number-input'; 
 import * as z from "zod";
-import { toast } from "sonner";
 import QuestionField from "./question-field/question-field";
+import { useFormSubmission } from "./useFormSubmission";
 
 interface FormViewProps {
   form: GQLForm;
@@ -147,8 +147,8 @@ const buildDefaultValues = (questions: Question[] | null | undefined) => {
 };
 
 export default function FormView({ form: formData }: FormViewProps) { // Rename prop to avoid conflict
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  // const [isSubmitting, setIsSubmitting] = useState(false);
+  // const [submitted, setSubmitted] = useState(false);
 
   // Memoize schema and default values generation
   const formSchema = useMemo(() => buildFormSchema(formData.questions), [formData.questions]);
@@ -168,25 +168,23 @@ export default function FormView({ form: formData }: FormViewProps) { // Rename 
     [formData.questions]
   );
 
-  // Use useCallback for the submit handler
-  const onSubmit = useCallback(async (values: FormValues) => {
-    setIsSubmitting(true);
-    try {
-      // TODO: Replace with actual API call
-      console.log('Form data:', values);
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
-
-      setSubmitted(true);
-      toast.success("Форма успешно отправлена!");
-      form.reset(); // Optionally reset form after successful submission
-    } catch (error) {
-      console.error('Error submitting form:', error);
-      // Provide more specific error feedback if possible
-      toast.error("Ошибка при отправке формы. Пожалуйста, попробуйте еще раз.");
-    } finally {
-      setIsSubmitting(false);
+  const { submitForm, isSubmitting, submitted } = useFormSubmission({
+    form: formData,
+    onSuccess: () => {
+      // Дополнительные действия при успехе
+      // например, form.reset();
+    },
+    onError: (error) => {
+      // Дополнительная обработка ошибок
+      console.error('Custom error handling:', error);
     }
-  }, [form]); // Add form dependency for form.reset()
+  });
+  
+  // Упрощенная функция onSubmit
+  const onSubmit = useCallback(async (values: FormValues) => {
+    console.log(values)
+    await submitForm(values);
+  }, [submitForm]);
 
   // Render success state
   if (submitted) {

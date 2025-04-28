@@ -4,7 +4,7 @@ input AnswerInput {
   textValue: String
   boolValue: Boolean
   numberValue: Float
-  dateValue: DateTime
+  dateValue: String
   optionIds: [ID!]
 }
 
@@ -22,7 +22,7 @@ type Answer {
   textValue: String
   boolValue: Boolean
   numberValue: Float
-  dateValue: DateTime
+  dateValue: String
   selectedOptions: [Option!]
 }
 
@@ -30,7 +30,7 @@ type FormResponse {
   id: ID!
   formId: ID!
   form: Form
-  createdAt: DateTime!
+  createdAt: String!
   answers: [Answer!]!
 }
 

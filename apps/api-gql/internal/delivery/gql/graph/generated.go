@@ -47,6 +47,17 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	Answer struct {
+		BoolValue       func(childComplexity int) int
+		DateValue       func(childComplexity int) int
+		ID              func(childComplexity int) int
+		NumberValue     func(childComplexity int) int
+		Question        func(childComplexity int) int
+		QuestionID      func(childComplexity int) int
+		SelectedOptions func(childComplexity int) int
+		TextValue       func(childComplexity int) int
+	}
+
 	Form struct {
 		Access      func(childComplexity int) int
 		CreatedAt   func(childComplexity int) int
@@ -58,14 +69,23 @@ type ComplexityRoot struct {
 		UpdatedAt   func(childComplexity int) int
 	}
 
+	FormResponse struct {
+		Answers   func(childComplexity int) int
+		CreatedAt func(childComplexity int) int
+		Form      func(childComplexity int) int
+		FormID    func(childComplexity int) int
+		ID        func(childComplexity int) int
+	}
+
 	Mutation struct {
-		CreateForm     func(childComplexity int, input gqlmodel.FormInput) int
-		DeleteForm     func(childComplexity int, id string) int
-		DeleteOption   func(childComplexity int, id string) int
-		DeleteQuestion func(childComplexity int, id string) int
-		UpdateForm     func(childComplexity int, id string, input gqlmodel.FormUpdateInput) int
-		UpdateOption   func(childComplexity int, id string, input gqlmodel.OptionUpdateInput) int
-		UpdateQuestion func(childComplexity int, id string, input gqlmodel.QuestionUpdateInput) int
+		CreateForm         func(childComplexity int, input gqlmodel.FormInput) int
+		DeleteForm         func(childComplexity int, id string) int
+		DeleteOption       func(childComplexity int, id string) int
+		DeleteQuestion     func(childComplexity int, id string) int
+		SubmitFormResponse func(childComplexity int, input gqlmodel.FormResponseInput) int
+		UpdateForm         func(childComplexity int, id string, input gqlmodel.FormUpdateInput) int
+		UpdateOption       func(childComplexity int, id string, input gqlmodel.OptionUpdateInput) int
+		UpdateQuestion     func(childComplexity int, id string, input gqlmodel.QuestionUpdateInput) int
 	}
 
 	Option struct {
@@ -81,10 +101,12 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Form  func(childComplexity int, id string) int
-		Forms func(childComplexity int, ownerID *string, access *gqlmodel.FormAccess) int
-		Me    func(childComplexity int) int
-		Ping  func(childComplexity int) int
+		Form          func(childComplexity int, id string) int
+		FormResponse  func(childComplexity int, id string) int
+		FormResponses func(childComplexity int, formID string) int
+		Forms         func(childComplexity int, ownerID *string, access *gqlmodel.FormAccess) int
+		Me            func(childComplexity int) int
+		Ping          func(childComplexity int) int
 	}
 
 	Question struct {
@@ -109,6 +131,7 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
+	SubmitFormResponse(ctx context.Context, input gqlmodel.FormResponseInput) (*gqlmodel.FormResponse, error)
 	CreateForm(ctx context.Context, input gqlmodel.FormInput) (*gqlmodel.Form, error)
 	UpdateForm(ctx context.Context, id string, input gqlmodel.FormUpdateInput) (*gqlmodel.Form, error)
 	DeleteForm(ctx context.Context, id string) (bool, error)
@@ -118,6 +141,8 @@ type MutationResolver interface {
 	DeleteOption(ctx context.Context, id string) (bool, error)
 }
 type QueryResolver interface {
+	FormResponses(ctx context.Context, formID string) ([]*gqlmodel.FormResponse, error)
+	FormResponse(ctx context.Context, id string) (*gqlmodel.FormResponse, error)
 	Form(ctx context.Context, id string) (*gqlmodel.Form, error)
 	Forms(ctx context.Context, ownerID *string, access *gqlmodel.FormAccess) ([]*gqlmodel.Form, error)
 	Ping(ctx context.Context) (*gqlmodel.Ping, error)
@@ -142,6 +167,62 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e, 0, 0, nil}
 	_ = ec
 	switch typeName + "." + field {
+
+	case "Answer.boolValue":
+		if e.complexity.Answer.BoolValue == nil {
+			break
+		}
+
+		return e.complexity.Answer.BoolValue(childComplexity), true
+
+	case "Answer.dateValue":
+		if e.complexity.Answer.DateValue == nil {
+			break
+		}
+
+		return e.complexity.Answer.DateValue(childComplexity), true
+
+	case "Answer.id":
+		if e.complexity.Answer.ID == nil {
+			break
+		}
+
+		return e.complexity.Answer.ID(childComplexity), true
+
+	case "Answer.numberValue":
+		if e.complexity.Answer.NumberValue == nil {
+			break
+		}
+
+		return e.complexity.Answer.NumberValue(childComplexity), true
+
+	case "Answer.question":
+		if e.complexity.Answer.Question == nil {
+			break
+		}
+
+		return e.complexity.Answer.Question(childComplexity), true
+
+	case "Answer.questionId":
+		if e.complexity.Answer.QuestionID == nil {
+			break
+		}
+
+		return e.complexity.Answer.QuestionID(childComplexity), true
+
+	case "Answer.selectedOptions":
+		if e.complexity.Answer.SelectedOptions == nil {
+			break
+		}
+
+		return e.complexity.Answer.SelectedOptions(childComplexity), true
+
+	case "Answer.textValue":
+		if e.complexity.Answer.TextValue == nil {
+			break
+		}
+
+		return e.complexity.Answer.TextValue(childComplexity), true
 
 	case "Form.access":
 		if e.complexity.Form.Access == nil {
@@ -199,6 +280,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Form.UpdatedAt(childComplexity), true
 
+	case "FormResponse.answers":
+		if e.complexity.FormResponse.Answers == nil {
+			break
+		}
+
+		return e.complexity.FormResponse.Answers(childComplexity), true
+
+	case "FormResponse.createdAt":
+		if e.complexity.FormResponse.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.FormResponse.CreatedAt(childComplexity), true
+
+	case "FormResponse.form":
+		if e.complexity.FormResponse.Form == nil {
+			break
+		}
+
+		return e.complexity.FormResponse.Form(childComplexity), true
+
+	case "FormResponse.formId":
+		if e.complexity.FormResponse.FormID == nil {
+			break
+		}
+
+		return e.complexity.FormResponse.FormID(childComplexity), true
+
+	case "FormResponse.id":
+		if e.complexity.FormResponse.ID == nil {
+			break
+		}
+
+		return e.complexity.FormResponse.ID(childComplexity), true
+
 	case "Mutation.createForm":
 		if e.complexity.Mutation.CreateForm == nil {
 			break
@@ -246,6 +362,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.DeleteQuestion(childComplexity, args["id"].(string)), true
+
+	case "Mutation.submitFormResponse":
+		if e.complexity.Mutation.SubmitFormResponse == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_submitFormResponse_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.SubmitFormResponse(childComplexity, args["input"].(gqlmodel.FormResponseInput)), true
 
 	case "Mutation.updateForm":
 		if e.complexity.Mutation.UpdateForm == nil {
@@ -336,6 +464,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Form(childComplexity, args["id"].(string)), true
+
+	case "Query.formResponse":
+		if e.complexity.Query.FormResponse == nil {
+			break
+		}
+
+		args, err := ec.field_Query_formResponse_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.FormResponse(childComplexity, args["id"].(string)), true
+
+	case "Query.formResponses":
+		if e.complexity.Query.FormResponses == nil {
+			break
+		}
+
+		args, err := ec.field_Query_formResponses_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.FormResponses(childComplexity, args["formId"].(string)), true
 
 	case "Query.forms":
 		if e.complexity.Query.Forms == nil {
@@ -469,7 +621,9 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := executionContext{opCtx, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputAnswerInput,
 		ec.unmarshalInputFormInput,
+		ec.unmarshalInputFormResponseInput,
 		ec.unmarshalInputFormUpdateInput,
 		ec.unmarshalInputOptionInput,
 		ec.unmarshalInputOptionUpdateInput,
@@ -572,6 +726,54 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
+	{Name: "../schema/answer.graphqls", Input: `# Входные данные для ответа на вопрос
+input AnswerInput {
+  questionId: ID!
+  textValue: String
+  boolValue: Boolean
+  numberValue: Float
+  dateValue: String
+  optionIds: [ID!]
+}
+
+# Входные данные для отправки формы
+input FormResponseInput {
+  formId: ID!
+  answers: [AnswerInput!]!
+}
+
+# Типы для ответов
+type Answer {
+  id: ID!
+  questionId: ID!
+  question: Question
+  textValue: String
+  boolValue: Boolean
+  numberValue: Float
+  dateValue: String
+  selectedOptions: [Option!]
+}
+
+type FormResponse {
+  id: ID!
+  formId: ID!
+  form: Form
+  createdAt: String!
+  answers: [Answer!]!
+}
+
+# Добавляем в Mutation
+extend type Mutation {
+  # Отправка ответов на форму
+  submitFormResponse(input: FormResponseInput!): FormResponse!
+}
+
+# Добавляем в Query
+extend type Query {
+  # Получение ответов на форму (только для владельца)
+  formResponses(formId: ID!): [FormResponse!]! @isAuthenticated
+  formResponse(id: ID!): FormResponse @isAuthenticated
+}`, BuiltIn: false},
 	{Name: "../schema/form.graphqls", Input: `# Enums
 enum FormAccess {
   PRIVATE
@@ -814,6 +1016,29 @@ func (ec *executionContext) field_Mutation_deleteQuestion_argsID(
 	return zeroVal, nil
 }
 
+func (ec *executionContext) field_Mutation_submitFormResponse_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := ec.field_Mutation_submitFormResponse_argsInput(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_submitFormResponse_argsInput(
+	ctx context.Context,
+	rawArgs map[string]any,
+) (gqlmodel.FormResponseInput, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+	if tmp, ok := rawArgs["input"]; ok {
+		return ec.unmarshalNFormResponseInput2githubᚗcomᚋTrySquadDFᚋformifyᚋapiᚑgqlᚋinternalᚋdeliveryᚋgqlᚋgraphᚋmodelᚐFormResponseInput(ctx, tmp)
+	}
+
+	var zeroVal gqlmodel.FormResponseInput
+	return zeroVal, nil
+}
+
 func (ec *executionContext) field_Mutation_updateForm_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -954,6 +1179,52 @@ func (ec *executionContext) field_Query___type_argsName(
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
 	if tmp, ok := rawArgs["name"]; ok {
 		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_formResponse_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := ec.field_Query_formResponse_argsID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["id"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Query_formResponse_argsID(
+	ctx context.Context,
+	rawArgs map[string]any,
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+	if tmp, ok := rawArgs["id"]; ok {
+		return ec.unmarshalNID2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_formResponses_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := ec.field_Query_formResponses_argsFormID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["formId"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Query_formResponses_argsFormID(
+	ctx context.Context,
+	rawArgs map[string]any,
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("formId"))
+	if tmp, ok := rawArgs["formId"]; ok {
+		return ec.unmarshalNID2string(ctx, tmp)
 	}
 
 	var zeroVal string
@@ -1123,6 +1394,366 @@ func (ec *executionContext) field___Type_fields_argsIncludeDeprecated(
 // endregion ************************** directives.gotpl **************************
 
 // region    **************************** field.gotpl *****************************
+
+func (ec *executionContext) _Answer_id(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.Answer) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Answer_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Answer_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Answer",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Answer_questionId(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.Answer) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Answer_questionId(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.QuestionID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Answer_questionId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Answer",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Answer_question(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.Answer) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Answer_question(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Question, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*gqlmodel.Question)
+	fc.Result = res
+	return ec.marshalOQuestion2ᚖgithubᚗcomᚋTrySquadDFᚋformifyᚋapiᚑgqlᚋinternalᚋdeliveryᚋgqlᚋgraphᚋmodelᚐQuestion(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Answer_question(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Answer",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Question_id(ctx, field)
+			case "formId":
+				return ec.fieldContext_Question_formId(ctx, field)
+			case "text":
+				return ec.fieldContext_Question_text(ctx, field)
+			case "type":
+				return ec.fieldContext_Question_type(ctx, field)
+			case "required":
+				return ec.fieldContext_Question_required(ctx, field)
+			case "order":
+				return ec.fieldContext_Question_order(ctx, field)
+			case "options":
+				return ec.fieldContext_Question_options(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Question", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Answer_textValue(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.Answer) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Answer_textValue(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TextValue, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Answer_textValue(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Answer",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Answer_boolValue(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.Answer) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Answer_boolValue(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.BoolValue, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*bool)
+	fc.Result = res
+	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Answer_boolValue(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Answer",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Answer_numberValue(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.Answer) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Answer_numberValue(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NumberValue, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*float64)
+	fc.Result = res
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Answer_numberValue(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Answer",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Answer_dateValue(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.Answer) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Answer_dateValue(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DateValue, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Answer_dateValue(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Answer",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Answer_selectedOptions(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.Answer) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Answer_selectedOptions(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.SelectedOptions, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*gqlmodel.Option)
+	fc.Result = res
+	return ec.marshalOOption2ᚕᚖgithubᚗcomᚋTrySquadDFᚋformifyᚋapiᚑgqlᚋinternalᚋdeliveryᚋgqlᚋgraphᚋmodelᚐOptionᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Answer_selectedOptions(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Answer",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Option_id(ctx, field)
+			case "questionId":
+				return ec.fieldContext_Option_questionId(ctx, field)
+			case "text":
+				return ec.fieldContext_Option_text(ctx, field)
+			case "order":
+				return ec.fieldContext_Option_order(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Option", field.Name)
+		},
+	}
+	return fc, nil
+}
 
 func (ec *executionContext) _Form_id(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.Form) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Form_id(ctx, field)
@@ -1485,6 +2116,326 @@ func (ec *executionContext) fieldContext_Form_questions(_ context.Context, field
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Question", field.Name)
 		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _FormResponse_id(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.FormResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_FormResponse_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_FormResponse_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "FormResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _FormResponse_formId(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.FormResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_FormResponse_formId(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.FormID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_FormResponse_formId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "FormResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _FormResponse_form(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.FormResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_FormResponse_form(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Form, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*gqlmodel.Form)
+	fc.Result = res
+	return ec.marshalOForm2ᚖgithubᚗcomᚋTrySquadDFᚋformifyᚋapiᚑgqlᚋinternalᚋdeliveryᚋgqlᚋgraphᚋmodelᚐForm(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_FormResponse_form(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "FormResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Form_id(ctx, field)
+			case "ownerId":
+				return ec.fieldContext_Form_ownerId(ctx, field)
+			case "title":
+				return ec.fieldContext_Form_title(ctx, field)
+			case "description":
+				return ec.fieldContext_Form_description(ctx, field)
+			case "access":
+				return ec.fieldContext_Form_access(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Form_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Form_updatedAt(ctx, field)
+			case "questions":
+				return ec.fieldContext_Form_questions(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Form", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _FormResponse_createdAt(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.FormResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_FormResponse_createdAt(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_FormResponse_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "FormResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _FormResponse_answers(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.FormResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_FormResponse_answers(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Answers, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*gqlmodel.Answer)
+	fc.Result = res
+	return ec.marshalNAnswer2ᚕᚖgithubᚗcomᚋTrySquadDFᚋformifyᚋapiᚑgqlᚋinternalᚋdeliveryᚋgqlᚋgraphᚋmodelᚐAnswerᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_FormResponse_answers(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "FormResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Answer_id(ctx, field)
+			case "questionId":
+				return ec.fieldContext_Answer_questionId(ctx, field)
+			case "question":
+				return ec.fieldContext_Answer_question(ctx, field)
+			case "textValue":
+				return ec.fieldContext_Answer_textValue(ctx, field)
+			case "boolValue":
+				return ec.fieldContext_Answer_boolValue(ctx, field)
+			case "numberValue":
+				return ec.fieldContext_Answer_numberValue(ctx, field)
+			case "dateValue":
+				return ec.fieldContext_Answer_dateValue(ctx, field)
+			case "selectedOptions":
+				return ec.fieldContext_Answer_selectedOptions(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Answer", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_submitFormResponse(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_submitFormResponse(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().SubmitFormResponse(rctx, fc.Args["input"].(gqlmodel.FormResponseInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*gqlmodel.FormResponse)
+	fc.Result = res
+	return ec.marshalNFormResponse2ᚖgithubᚗcomᚋTrySquadDFᚋformifyᚋapiᚑgqlᚋinternalᚋdeliveryᚋgqlᚋgraphᚋmodelᚐFormResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_submitFormResponse(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_FormResponse_id(ctx, field)
+			case "formId":
+				return ec.fieldContext_FormResponse_formId(ctx, field)
+			case "form":
+				return ec.fieldContext_FormResponse_form(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_FormResponse_createdAt(ctx, field)
+			case "answers":
+				return ec.fieldContext_FormResponse_answers(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type FormResponse", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_submitFormResponse_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
 	}
 	return fc, nil
 }
@@ -2350,6 +3301,181 @@ func (ec *executionContext) fieldContext_Ping_message(_ context.Context, field g
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
 		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_formResponses(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_formResponses(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		directive0 := func(rctx context.Context) (any, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Query().FormResponses(rctx, fc.Args["formId"].(string))
+		}
+
+		directive1 := func(ctx context.Context) (any, error) {
+			if ec.directives.IsAuthenticated == nil {
+				var zeroVal []*gqlmodel.FormResponse
+				return zeroVal, errors.New("directive isAuthenticated is not implemented")
+			}
+			return ec.directives.IsAuthenticated(ctx, nil, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.([]*gqlmodel.FormResponse); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/TrySquadDF/formify/api-gql/internal/delivery/gql/graph/model.FormResponse`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*gqlmodel.FormResponse)
+	fc.Result = res
+	return ec.marshalNFormResponse2ᚕᚖgithubᚗcomᚋTrySquadDFᚋformifyᚋapiᚑgqlᚋinternalᚋdeliveryᚋgqlᚋgraphᚋmodelᚐFormResponseᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_formResponses(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_FormResponse_id(ctx, field)
+			case "formId":
+				return ec.fieldContext_FormResponse_formId(ctx, field)
+			case "form":
+				return ec.fieldContext_FormResponse_form(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_FormResponse_createdAt(ctx, field)
+			case "answers":
+				return ec.fieldContext_FormResponse_answers(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type FormResponse", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_formResponses_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_formResponse(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_formResponse(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		directive0 := func(rctx context.Context) (any, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Query().FormResponse(rctx, fc.Args["id"].(string))
+		}
+
+		directive1 := func(ctx context.Context) (any, error) {
+			if ec.directives.IsAuthenticated == nil {
+				var zeroVal *gqlmodel.FormResponse
+				return zeroVal, errors.New("directive isAuthenticated is not implemented")
+			}
+			return ec.directives.IsAuthenticated(ctx, nil, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*gqlmodel.FormResponse); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/TrySquadDF/formify/api-gql/internal/delivery/gql/graph/model.FormResponse`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*gqlmodel.FormResponse)
+	fc.Result = res
+	return ec.marshalOFormResponse2ᚖgithubᚗcomᚋTrySquadDFᚋformifyᚋapiᚑgqlᚋinternalᚋdeliveryᚋgqlᚋgraphᚋmodelᚐFormResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_formResponse(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_FormResponse_id(ctx, field)
+			case "formId":
+				return ec.fieldContext_FormResponse_formId(ctx, field)
+			case "form":
+				return ec.fieldContext_FormResponse_form(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_FormResponse_createdAt(ctx, field)
+			case "answers":
+				return ec.fieldContext_FormResponse_answers(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type FormResponse", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_formResponse_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
 	}
 	return fc, nil
 }
@@ -5374,6 +6500,68 @@ func (ec *executionContext) fieldContext___Type_isOneOf(_ context.Context, field
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputAnswerInput(ctx context.Context, obj any) (gqlmodel.AnswerInput, error) {
+	var it gqlmodel.AnswerInput
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"questionId", "textValue", "boolValue", "numberValue", "dateValue", "optionIds"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "questionId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("questionId"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.QuestionID = data
+		case "textValue":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("textValue"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.TextValue = data
+		case "boolValue":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("boolValue"))
+			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.BoolValue = data
+		case "numberValue":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("numberValue"))
+			data, err := ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.NumberValue = data
+		case "dateValue":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("dateValue"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DateValue = data
+		case "optionIds":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("optionIds"))
+			data, err := ec.unmarshalOID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.OptionIds = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputFormInput(ctx context.Context, obj any) (gqlmodel.FormInput, error) {
 	var it gqlmodel.FormInput
 	asMap := map[string]any{}
@@ -5420,6 +6608,40 @@ func (ec *executionContext) unmarshalInputFormInput(ctx context.Context, obj any
 				return it, err
 			}
 			it.Questions = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputFormResponseInput(ctx context.Context, obj any) (gqlmodel.FormResponseInput, error) {
+	var it gqlmodel.FormResponseInput
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"formId", "answers"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "formId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("formId"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FormID = data
+		case "answers":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("answers"))
+			data, err := ec.unmarshalNAnswerInput2ᚕᚖgithubᚗcomᚋTrySquadDFᚋformifyᚋapiᚑgqlᚋinternalᚋdeliveryᚋgqlᚋgraphᚋmodelᚐAnswerInputᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Answers = data
 		}
 	}
 
@@ -5660,6 +6882,62 @@ func (ec *executionContext) unmarshalInputQuestionUpdateInput(ctx context.Contex
 
 // region    **************************** object.gotpl ****************************
 
+var answerImplementors = []string{"Answer"}
+
+func (ec *executionContext) _Answer(ctx context.Context, sel ast.SelectionSet, obj *gqlmodel.Answer) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, answerImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Answer")
+		case "id":
+			out.Values[i] = ec._Answer_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "questionId":
+			out.Values[i] = ec._Answer_questionId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "question":
+			out.Values[i] = ec._Answer_question(ctx, field, obj)
+		case "textValue":
+			out.Values[i] = ec._Answer_textValue(ctx, field, obj)
+		case "boolValue":
+			out.Values[i] = ec._Answer_boolValue(ctx, field, obj)
+		case "numberValue":
+			out.Values[i] = ec._Answer_numberValue(ctx, field, obj)
+		case "dateValue":
+			out.Values[i] = ec._Answer_dateValue(ctx, field, obj)
+		case "selectedOptions":
+			out.Values[i] = ec._Answer_selectedOptions(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var formImplementors = []string{"Form"}
 
 func (ec *executionContext) _Form(ctx context.Context, sel ast.SelectionSet, obj *gqlmodel.Form) graphql.Marshaler {
@@ -5731,6 +7009,62 @@ func (ec *executionContext) _Form(ctx context.Context, sel ast.SelectionSet, obj
 	return out
 }
 
+var formResponseImplementors = []string{"FormResponse"}
+
+func (ec *executionContext) _FormResponse(ctx context.Context, sel ast.SelectionSet, obj *gqlmodel.FormResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, formResponseImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("FormResponse")
+		case "id":
+			out.Values[i] = ec._FormResponse_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "formId":
+			out.Values[i] = ec._FormResponse_formId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "form":
+			out.Values[i] = ec._FormResponse_form(ctx, field, obj)
+		case "createdAt":
+			out.Values[i] = ec._FormResponse_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "answers":
+			out.Values[i] = ec._FormResponse_answers(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var mutationImplementors = []string{"Mutation"}
 
 func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -5750,6 +7084,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Mutation")
+		case "submitFormResponse":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_submitFormResponse(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "createForm":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_createForm(ctx, field)
@@ -5939,6 +7280,47 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
+		case "formResponses":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_formResponses(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "formResponse":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_formResponse(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "form":
 			field := field
 
@@ -6525,6 +7907,80 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
+func (ec *executionContext) marshalNAnswer2ᚕᚖgithubᚗcomᚋTrySquadDFᚋformifyᚋapiᚑgqlᚋinternalᚋdeliveryᚋgqlᚋgraphᚋmodelᚐAnswerᚄ(ctx context.Context, sel ast.SelectionSet, v []*gqlmodel.Answer) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNAnswer2ᚖgithubᚗcomᚋTrySquadDFᚋformifyᚋapiᚑgqlᚋinternalᚋdeliveryᚋgqlᚋgraphᚋmodelᚐAnswer(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNAnswer2ᚖgithubᚗcomᚋTrySquadDFᚋformifyᚋapiᚑgqlᚋinternalᚋdeliveryᚋgqlᚋgraphᚋmodelᚐAnswer(ctx context.Context, sel ast.SelectionSet, v *gqlmodel.Answer) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._Answer(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNAnswerInput2ᚕᚖgithubᚗcomᚋTrySquadDFᚋformifyᚋapiᚑgqlᚋinternalᚋdeliveryᚋgqlᚋgraphᚋmodelᚐAnswerInputᚄ(ctx context.Context, v any) ([]*gqlmodel.AnswerInput, error) {
+	var vSlice []any
+	vSlice = graphql.CoerceList(v)
+	var err error
+	res := make([]*gqlmodel.AnswerInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNAnswerInput2ᚖgithubᚗcomᚋTrySquadDFᚋformifyᚋapiᚑgqlᚋinternalᚋdeliveryᚋgqlᚋgraphᚋmodelᚐAnswerInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalNAnswerInput2ᚖgithubᚗcomᚋTrySquadDFᚋformifyᚋapiᚑgqlᚋinternalᚋdeliveryᚋgqlᚋgraphᚋmodelᚐAnswerInput(ctx context.Context, v any) (*gqlmodel.AnswerInput, error) {
+	res, err := ec.unmarshalInputAnswerInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v any) (bool, error) {
 	res, err := graphql.UnmarshalBoolean(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -6610,6 +8066,69 @@ func (ec *executionContext) marshalNFormAccess2githubᚗcomᚋTrySquadDFᚋformi
 
 func (ec *executionContext) unmarshalNFormInput2githubᚗcomᚋTrySquadDFᚋformifyᚋapiᚑgqlᚋinternalᚋdeliveryᚋgqlᚋgraphᚋmodelᚐFormInput(ctx context.Context, v any) (gqlmodel.FormInput, error) {
 	res, err := ec.unmarshalInputFormInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNFormResponse2githubᚗcomᚋTrySquadDFᚋformifyᚋapiᚑgqlᚋinternalᚋdeliveryᚋgqlᚋgraphᚋmodelᚐFormResponse(ctx context.Context, sel ast.SelectionSet, v gqlmodel.FormResponse) graphql.Marshaler {
+	return ec._FormResponse(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNFormResponse2ᚕᚖgithubᚗcomᚋTrySquadDFᚋformifyᚋapiᚑgqlᚋinternalᚋdeliveryᚋgqlᚋgraphᚋmodelᚐFormResponseᚄ(ctx context.Context, sel ast.SelectionSet, v []*gqlmodel.FormResponse) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNFormResponse2ᚖgithubᚗcomᚋTrySquadDFᚋformifyᚋapiᚑgqlᚋinternalᚋdeliveryᚋgqlᚋgraphᚋmodelᚐFormResponse(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNFormResponse2ᚖgithubᚗcomᚋTrySquadDFᚋformifyᚋapiᚑgqlᚋinternalᚋdeliveryᚋgqlᚋgraphᚋmodelᚐFormResponse(ctx context.Context, sel ast.SelectionSet, v *gqlmodel.FormResponse) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._FormResponse(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNFormResponseInput2githubᚗcomᚋTrySquadDFᚋformifyᚋapiᚑgqlᚋinternalᚋdeliveryᚋgqlᚋgraphᚋmodelᚐFormResponseInput(ctx context.Context, v any) (gqlmodel.FormResponseInput, error) {
+	res, err := ec.unmarshalInputFormResponseInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
@@ -7026,6 +8545,22 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return res
 }
 
+func (ec *executionContext) unmarshalOFloat2ᚖfloat64(ctx context.Context, v any) (*float64, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalFloatContext(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOFloat2ᚖfloat64(ctx context.Context, sel ast.SelectionSet, v *float64) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	res := graphql.MarshalFloatContext(*v)
+	return graphql.WrapContextMarshaler(ctx, res)
+}
+
 func (ec *executionContext) marshalOForm2ᚖgithubᚗcomᚋTrySquadDFᚋformifyᚋapiᚑgqlᚋinternalᚋdeliveryᚋgqlᚋgraphᚋmodelᚐForm(ctx context.Context, sel ast.SelectionSet, v *gqlmodel.Form) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -7047,6 +8582,49 @@ func (ec *executionContext) marshalOFormAccess2ᚖgithubᚗcomᚋTrySquadDFᚋfo
 		return graphql.Null
 	}
 	return v
+}
+
+func (ec *executionContext) marshalOFormResponse2ᚖgithubᚗcomᚋTrySquadDFᚋformifyᚋapiᚑgqlᚋinternalᚋdeliveryᚋgqlᚋgraphᚋmodelᚐFormResponse(ctx context.Context, sel ast.SelectionSet, v *gqlmodel.FormResponse) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._FormResponse(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOID2ᚕstringᚄ(ctx context.Context, v any) ([]string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []any
+	vSlice = graphql.CoerceList(v)
+	var err error
+	res := make([]string, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNID2string(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOID2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNID2string(ctx, sel, v[i])
+	}
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) unmarshalOID2ᚖstring(ctx context.Context, v any) (*string, error) {
@@ -7191,6 +8769,13 @@ func (ec *executionContext) marshalOQuestion2ᚕᚖgithubᚗcomᚋTrySquadDFᚋf
 	}
 
 	return ret
+}
+
+func (ec *executionContext) marshalOQuestion2ᚖgithubᚗcomᚋTrySquadDFᚋformifyᚋapiᚑgqlᚋinternalᚋdeliveryᚋgqlᚋgraphᚋmodelᚐQuestion(ctx context.Context, sel ast.SelectionSet, v *gqlmodel.Question) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Question(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOQuestionInput2ᚕᚖgithubᚗcomᚋTrySquadDFᚋformifyᚋapiᚑgqlᚋinternalᚋdeliveryᚋgqlᚋgraphᚋmodelᚐQuestionInputᚄ(ctx context.Context, v any) ([]*gqlmodel.QuestionInput, error) {

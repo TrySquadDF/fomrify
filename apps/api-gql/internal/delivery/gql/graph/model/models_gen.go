@@ -8,6 +8,26 @@ import (
 	"strconv"
 )
 
+type Answer struct {
+	ID              string    `json:"id"`
+	QuestionID      string    `json:"questionId"`
+	Question        *Question `json:"question,omitempty"`
+	TextValue       *string   `json:"textValue,omitempty"`
+	BoolValue       *bool     `json:"boolValue,omitempty"`
+	NumberValue     *float64  `json:"numberValue,omitempty"`
+	DateValue       *string   `json:"dateValue,omitempty"`
+	SelectedOptions []*Option `json:"selectedOptions,omitempty"`
+}
+
+type AnswerInput struct {
+	QuestionID  string   `json:"questionId"`
+	TextValue   *string  `json:"textValue,omitempty"`
+	BoolValue   *bool    `json:"boolValue,omitempty"`
+	NumberValue *float64 `json:"numberValue,omitempty"`
+	DateValue   *string  `json:"dateValue,omitempty"`
+	OptionIds   []string `json:"optionIds,omitempty"`
+}
+
 type Form struct {
 	ID          string      `json:"id"`
 	OwnerID     string      `json:"ownerId"`
@@ -24,6 +44,19 @@ type FormInput struct {
 	Description *string          `json:"description,omitempty"`
 	Access      *FormAccess      `json:"access,omitempty"`
 	Questions   []*QuestionInput `json:"questions,omitempty"`
+}
+
+type FormResponse struct {
+	ID        string    `json:"id"`
+	FormID    string    `json:"formId"`
+	Form      *Form     `json:"form,omitempty"`
+	CreatedAt string    `json:"createdAt"`
+	Answers   []*Answer `json:"answers"`
+}
+
+type FormResponseInput struct {
+	FormID  string         `json:"formId"`
+	Answers []*AnswerInput `json:"answers"`
 }
 
 type FormUpdateInput struct {

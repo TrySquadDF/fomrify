@@ -16,14 +16,15 @@ func (FormResponse) TableName() string {
 }
 
 type Answer struct {
-    ID          string `gorm:"column:id;primaryKey;type:uuid;default:gen_random_uuid()" json:"id"`
-    ResponseID  string `gorm:"column:response_id;type:uuid;not null;index" json:"responseId"`
-    QuestionID  string `gorm:"column:question_id;type:uuid;not null;index" json:"questionId"`
-    TextValue   string `gorm:"column:text_value;type:text" json:"textValue"`
-    BoolValue   *bool  `gorm:"column:bool_value" json:"boolValue,omitempty"`
-    NumberValue *float64 `gorm:"column:number_value" json:"numberValue,omitempty"`
-    DateValue   *time.Time `gorm:"column:date_value" json:"dateValue,omitempty"`
-    OptionIDs   []string `gorm:"-" json:"optionIds,omitempty"`
+    ID             string    `gorm:"column:id;primaryKey;type:uuid;default:gen_random_uuid()" json:"id"`
+    ResponseID     string    `gorm:"column:response_id;type:uuid;not null;index" json:"responseId"`
+    QuestionID     string    `gorm:"column:question_id;type:uuid;not null;index" json:"questionId"`
+    Question       Question  `gorm:"foreignKey:QuestionID;references:ID" json:"question,omitempty"`
+    TextValue      string    `gorm:"column:text_value;type:text" json:"textValue"`
+    BoolValue      *bool     `gorm:"column:bool_value" json:"boolValue,omitempty"`
+    NumberValue    *float64  `gorm:"column:number_value" json:"numberValue,omitempty"`
+    DateValue      *time.Time `gorm:"column:date_value" json:"dateValue,omitempty"`
+    SelectedOptions []Option  `gorm:"many2many:answer_options;foreignKey:ID;joinForeignKey:AnswerID;References:ID;joinReferences:OptionID" json:"selectedOptions,omitempty"`
 }
 
 func (Answer) TableName() string {

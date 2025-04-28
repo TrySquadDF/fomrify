@@ -15,6 +15,13 @@ import (
 	"gorm.io/gorm"
 )
 
+func FormsToGraphQL(forms []gomodel.Form) []*gqlmodel.Form {
+	result := make([]*gqlmodel.Form, len(forms))
+	for i, form := range forms {
+		result[i] = FormToGraphQL(&form)
+	}
+	return result
+}
 
 func FormToGraphQL(f *gomodel.Form) *gqlmodel.Form {
     access := gqlmodel.FormAccess(f.Access)
@@ -67,7 +74,6 @@ func optionToGraphQL(o *gomodel.Option) *gqlmodel.Option {
         Order:      o.Order,
     }
 }
-
 
 // CreateForm is the resolver for the createForm field.
 func (r *mutationResolver) CreateForm(ctx context.Context, input gqlmodel.FormInput) (*gqlmodel.Form, error) {
@@ -572,73 +578,4 @@ func (r *queryResolver) Forms(ctx context.Context, ownerID *string, access *gqlm
 //  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
 //    it when you're done.
 //  - You have helper methods in this file. Move them out to keep these resolver files clean.
-/*
-	type Form struct {
-    ID          string    `gorm:"primaryKey"`
-    OwnerID     string
-    Title       string
-    Description string
-    Access      string
-	CreatedAt   time.Time `gorm:"-"`
-    UpdatedAt   time.Time `gorm:"-"`
-    Questions   []Question
-}
-type Question struct {
-    ID        string  `gorm:"primaryKey"`
-    FormID    string
-    Text      string
-    Type      string
-    Required  bool
-    Order     int
-    Options   []Option
-}
-type Option struct {
-    ID         string `gorm:"primaryKey"`
-    QuestionID string
-    Text       string
-    Order      int
-}
-func formToGraphQL(f *Form) *gqlmodel.Form {
-    access := gqlmodel.FormAccess(f.Access)
-    return &gqlmodel.Form{
-        ID:          f.ID,
-        OwnerID:     f.OwnerID,
-        Title:       f.Title,
-        Description: &f.Description,
-        Access:      access,
-        CreatedAt:   f.CreatedAt.Format(time.RFC3339),
-        UpdatedAt:   f.UpdatedAt.Format(time.RFC3339),
-        Questions:   questionsToGraphQL(f.Questions),
-    }
-}
-func questionsToGraphQL(questions []Question) []*gqlmodel.Question {
-    result := make([]*gqlmodel.Question, len(questions))
-    for i, q := range questions {
-        result[i] = questionToGraphQL(&q)
-    }
-    return result
-}
-func questionToGraphQL(q *Question) *gqlmodel.Question {
-    return &gqlmodel.Question{
-        ID:       q.ID,
-        FormID:   q.FormID,
-        Text:     q.Text,
-        Type:     gqlmodel.QuestionType(q.Type),
-        Required: q.Required,
-        Order:    int32(q.Order),
-        Options:  optionsToGraphQL(q.Options),
-    }
-}
-func optionsToGraphQL(options []Option) []*gqlmodel.Option {
-    result := make([]*gqlmodel.Option, len(options))
-    for i, o := range options {
-        result[i] = &gqlmodel.Option{
-            ID:         o.ID,
-            QuestionID: o.QuestionID,
-            Text:       o.Text,
-            Order:      int32(o.Order),
-        }
-    }
-    return result
-}
-*/
+
