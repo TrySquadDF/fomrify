@@ -1,22 +1,9 @@
 import { gql, useMutation } from '@apollo/client';
 import { Form, FormInput } from '../gql/graphql';
 
-// Define the GraphQL mutation
 const CREATE_FORM_MUTATION = gql`
-  mutation CreateTestForm(
-    $title: String!,
-    $description: String!,
-    $access: AccessType!,
-    $questions: [QuestionInput!]!
-  ) {
-    createForm(
-      input: {
-        title: $title
-        description: $description
-        access: $access
-        questions: $questions
-      }
-    ) {
+  mutation CreateTestForm($input: FormInput!) {
+    createForm(input: $input) {
       id
       title
       description
@@ -41,5 +28,5 @@ const CREATE_FORM_MUTATION = gql`
 
 
 export const useCreateForm = () => {
-  return useMutation<{ createForm: Form },FormInput>(CREATE_FORM_MUTATION);
+  return useMutation<{ createForm: Form }, { input: FormInput }>(CREATE_FORM_MUTATION);
 };

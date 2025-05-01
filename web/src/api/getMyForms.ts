@@ -17,5 +17,5 @@ const getMyForms = gql`
 `
 
 export const useGetMyForms = () => useQuery<{ me?: Pick<User, 'forms'> }>(getMyForms, {
-    fetchPolicy: 'network-only',
+    fetchPolicy: 'cache-first',
 })

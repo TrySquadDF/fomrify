@@ -7,6 +7,7 @@ package resolvers
 import (
 	"context"
 	"errors"
+	"log"
 	"time"
 
 	gqlmodel "github.com/TrySquadDF/formify/api-gql/internal/delivery/gql/graph/model"
@@ -262,82 +263,90 @@ func (r *mutationResolver) UpdateForm(ctx context.Context, id string, input gqlm
 
 // DeleteForm is the resolver for the deleteForm field.
 func (r *mutationResolver) DeleteForm(ctx context.Context, id string) (bool, error) {
-	// Get user ID for authorization
-	userID, err := r.deps.Sessions.GetUserIDFromContext(ctx)
-	if err != nil {
-		return false, err
-	}
+    // Get user ID for authorization
+    userID, err := r.deps.Sessions.GetUserIDFromContext(ctx)
+    if err != nil {
+        return false, err
+    }
 
-	// Check if form exists and user has permission
-	var form gomodel.Form
-	if err := r.deps.Gorm.First(&form, "id = ?", id).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return false, errors.New("form not found")
-		}
-		return false, err
-	}
+    // Check if form exists and user has permission
+    var form gomodel.Form
+    if err := r.deps.Gorm.First(&form, "id = ?", id).Error; err != nil {
+        if errors.Is(err, gorm.ErrRecordNotFound) {
+            return false, errors.New("form not found")
+        }
+        return false, err
+    }
 
-	if form.OwnerID != userID {
-		return false, errors.New("not authorized to delete this form")
-	}
+    if form.OwnerID != userID {
+        return false, errors.New("not authorized to delete this form")
+    }
 
-	// Begin transaction
-	tx := r.deps.Gorm.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-		}
-	}()
+    // Begin transaction
+    tx := r.deps.Gorm.Begin()
+    defer func() {
+        if r := recover(); r != nil {
+            tx.Rollback()
+        }
+    }()
 
-	// 1. Find all questions for this form
-	var questions []gomodel.Question
-	if err := tx.Where("form_id = ?", id).Find(&questions).Error; err != nil {
-		tx.Rollback()
-		return false, err
-	}
+    // 1. Find all questions for this form
+    var questions []gomodel.Question
+    if err := tx.Where("form_id = ?", id).Find(&questions).Error; err != nil {
+        tx.Rollback()
+        return false, err
+    }
 
-	// 2. Delete options for each question
-	for _, q := range questions {
-		if err := tx.Where("question_id = ?", q.ID).Delete(&gomodel.Option{}).Error; err != nil {
-			tx.Rollback()
-			return false, err
-		}
-	}
+    // Extract question IDs
+    questionIDs := make([]string, len(questions))
+    for i, q := range questions {
+        questionIDs[i] = q.ID
+    }
 
-	// 3. Delete questions
-	if err := tx.Where("form_id = ?", id).Delete(&gomodel.Question{}).Error; err != nil {
-		tx.Rollback()
-		return false, err
-	}
+    // 2. Delete answers for all questions in this form
+    if len(questionIDs) > 0 {
+        if err := tx.Exec("DELETE FROM answers WHERE question_id IN ?", questionIDs).Error; err != nil {
+            tx.Rollback()
+            return false, err
+        }
+    }
 
-	// 4. Finally delete the form
-	if err := tx.Delete(&gomodel.Form{}, "id = ?", id).Error; err != nil {
-		tx.Rollback()
-		return false, err
-	}
+    // 3. Delete options for each question
+    if err := tx.Where("question_id IN ?", questionIDs).Delete(&gomodel.Option{}).Error; err != nil {
+        tx.Rollback()
+        return false, err
+    }
 
-	if err := tx.Commit().Error; err != nil {
-		return false, err
-	}
+    // 4. Delete questions
+    if err := tx.Where("form_id = ?", id).Delete(&gomodel.Question{}).Error; err != nil {
+        tx.Rollback()
+        return false, err
+    }
 
-	return true, nil
+    // 5. Finally delete the form
+    if err := tx.Delete(&gomodel.Form{}, "id = ?", id).Error; err != nil {
+        tx.Rollback()
+        return false, err
+    }
+
+    if err := tx.Commit().Error; err != nil {
+        return false, err
+    }
+
+    return true, nil
 }
 
-// UpdateQuestion is the resolver for the updateQuestion field.
 func (r *mutationResolver) UpdateQuestion(ctx context.Context, id string, input gqlmodel.QuestionUpdateInput) (*gqlmodel.Question, error) {
-	// Get user ID for authorization
 	userID, err := r.deps.Sessions.GetUserIDFromContext(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	// Find question and check if user owns the related form
 	var question gomodel.Question
 	if err := r.deps.Gorm.First(&question, "id = ?", id).Error; err != nil {
 		return nil, err
 	}
 
-	// Get form to check ownership
 	var form gomodel.Form
 	if err := r.deps.Gorm.First(&form, "id = ?", question.FormID).Error; err != nil {
 		return nil, err
@@ -347,7 +356,6 @@ func (r *mutationResolver) UpdateQuestion(ctx context.Context, id string, input 
 		return nil, errors.New("not authorized to modify this question")
 	}
 
-	// Begin transaction
 	tx := r.deps.Gorm.Begin()
 	defer func() {
 		if r := recover(); r != nil {
@@ -355,7 +363,6 @@ func (r *mutationResolver) UpdateQuestion(ctx context.Context, id string, input 
 		}
 	}()
 
-	// Update question fields
 	updates := map[string]interface{}{}
 
 	if input.Text != nil {
@@ -378,15 +385,12 @@ func (r *mutationResolver) UpdateQuestion(ctx context.Context, id string, input 
 		}
 	}
 
-	// Handle options if provided
 	if input.Options != nil {
-		// Delete existing options
 		if err := tx.Where("question_id = ?", id).Delete(&gomodel.Option{}).Error; err != nil {
 			tx.Rollback()
 			return nil, err
 		}
 
-		// Create new options
 		for _, oInput := range input.Options {
 			option := gomodel.Option{
 				ID:         uuid.New().String(),
@@ -406,7 +410,6 @@ func (r *mutationResolver) UpdateQuestion(ctx context.Context, id string, input 
 		return nil, err
 	}
 
-	// Fetch updated question with options
 	var result gomodel.Question
 	if err := r.deps.Gorm.Preload("Options").First(&result, "id = ?", id).Error; err != nil {
 		return nil, err
@@ -415,21 +418,17 @@ func (r *mutationResolver) UpdateQuestion(ctx context.Context, id string, input 
 	return questionToGraphQL(&result), nil
 }
 
-// DeleteQuestion is the resolver for the deleteQuestion field.
 func (r *mutationResolver) DeleteQuestion(ctx context.Context, id string) (bool, error) {
-	// Get user ID for authorization
 	userID, err := r.deps.Sessions.GetUserIDFromContext(ctx)
 	if err != nil {
 		return false, err
 	}
 
-	// Find question
 	var question gomodel.Question
 	if err := r.deps.Gorm.First(&question, "id = ?", id).Error; err != nil {
 		return false, err
 	}
 
-	// Check ownership of parent form
 	var form gomodel.Form
 	if err := r.deps.Gorm.First(&form, "id = ?", question.FormID).Error; err != nil {
 		return false, err
@@ -439,7 +438,6 @@ func (r *mutationResolver) DeleteQuestion(ctx context.Context, id string) (bool,
 		return false, errors.New("not authorized to delete this question")
 	}
 
-	// Delete question (will cascade delete options if set up properly)
 	if err := r.deps.Gorm.Delete(&gomodel.Question{}, "id = ?", id).Error; err != nil {
 		return false, err
 	}
@@ -447,27 +445,22 @@ func (r *mutationResolver) DeleteQuestion(ctx context.Context, id string) (bool,
 	return true, nil
 }
 
-// UpdateOption is the resolver for the updateOption field.
 func (r *mutationResolver) UpdateOption(ctx context.Context, id string, input gqlmodel.OptionUpdateInput) (*gqlmodel.Option, error) {
-	// Get user ID for authorization
 	userID, err := r.deps.Sessions.GetUserIDFromContext(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	// Find option
 	var option gomodel.Option
 	if err := r.deps.Gorm.First(&option, "id = ?", id).Error; err != nil {
 		return nil, err
 	}
 
-	// Find parent question
 	var question gomodel.Question
 	if err := r.deps.Gorm.First(&question, "id = ?", option.QuestionID).Error; err != nil {
 		return nil, err
 	}
 
-	// Find parent form to check ownership
 	var form gomodel.Form
 	if err := r.deps.Gorm.First(&form, "id = ?", question.FormID).Error; err != nil {
 		return nil, err
@@ -477,7 +470,6 @@ func (r *mutationResolver) UpdateOption(ctx context.Context, id string, input gq
 		return nil, errors.New("not authorized to modify this option")
 	}
 
-	// Update option
 	updates := map[string]interface{}{}
 
 	if input.Text != nil {
@@ -493,7 +485,6 @@ func (r *mutationResolver) UpdateOption(ctx context.Context, id string, input gq
 		}
 	}
 
-	// Reload option
 	if err := r.deps.Gorm.First(&option, "id = ?", id).Error; err != nil {
 		return nil, err
 	}
@@ -501,21 +492,17 @@ func (r *mutationResolver) UpdateOption(ctx context.Context, id string, input gq
 	return optionToGraphQL(&option), nil
 }
 
-// DeleteOption is the resolver for the deleteOption field.
 func (r *mutationResolver) DeleteOption(ctx context.Context, id string) (bool, error) {
-	// Get user ID for authorization
 	userID, err := r.deps.Sessions.GetUserIDFromContext(ctx)
 	if err != nil {
 		return false, err
 	}
 
-	// Find option
 	var option gomodel.Option
 	if err := r.deps.Gorm.First(&option, "id = ?", id).Error; err != nil {
 		return false, err
 	}
 
-	// Check ownership through question and form
 	var question gomodel.Question
 	if err := r.deps.Gorm.First(&question, "id = ?", option.QuestionID).Error; err != nil {
 		return false, err
@@ -530,7 +517,6 @@ func (r *mutationResolver) DeleteOption(ctx context.Context, id string) (bool, e
 		return false, errors.New("not authorized to delete this option")
 	}
 
-	// Delete option
 	if err := r.deps.Gorm.Delete(&gomodel.Option{}, "id = ?", id).Error; err != nil {
 		return false, err
 	}
@@ -538,20 +524,31 @@ func (r *mutationResolver) DeleteOption(ctx context.Context, id string) (bool, e
 	return true, nil
 }
 
-// Form is the resolver for the form field.
 func (r *queryResolver) Form(ctx context.Context, id string) (*gqlmodel.Form, error) {
-	var form gomodel.Form
-	if err := r.deps.Gorm.Preload("Questions.Options").First(&form, "id = ?", id).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, nil // GraphQL convention: return null for not found
-		}
-		return nil, err
-	}
+    if _, err := uuid.Parse(id); err != nil {
+        return nil, errors.New("invalid form ID format")
+    }
 
-	return FormToGraphQL(&form), nil
+    var form gomodel.Form
+    if err := r.deps.Gorm.Preload("Questions.Options").First(&form, "id = ?", id).Error; err != nil {
+        if errors.Is(err, gorm.ErrRecordNotFound) {
+            return nil, nil
+        }
+        return nil, err
+    }
+
+	log.Printf("Form: %v", form.Access)
+    if form.Access == gomodel.FormAccessPrivate {
+        userID, err := r.deps.Sessions.GetUserIDFromContext(ctx)
+
+        if err != nil || userID != form.OwnerID {
+            return nil, errors.New("not authorized to access this private form")
+        }
+    }
+
+    return FormToGraphQL(&form), nil
 }
 
-// Forms is the resolver for the forms field.
 func (r *queryResolver) Forms(ctx context.Context, ownerID *string, access *gqlmodel.FormAccess) ([]*gqlmodel.Form, error) {
 	query := r.deps.Gorm.Model(&gomodel.Form{}).Preload("Questions.Options")
 

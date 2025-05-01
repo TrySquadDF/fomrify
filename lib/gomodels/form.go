@@ -8,27 +8,26 @@ import (
 type FormAccess string
 
 const (
-    FormAccessPrivate   FormAccess = "private"
-    FormAccessByLink    FormAccess = "by_link"
-    FormAccessPublic    FormAccess = "public"
+    FormAccessPrivate   FormAccess = "PRIVATE"
+    FormAccessByLink    FormAccess = "BY_LINK"
+    FormAccessPublic    FormAccess = "PUBLIC"
 )
 
 // Типы вопросов
 type QuestionType string
 
 const (
-    QuestionTypeShortText      QuestionType = "short_text"
-    QuestionTypeParagraph      QuestionType = "paragraph"
-    QuestionTypeBoolean        QuestionType = "boolean"
-    QuestionTypeNumber         QuestionType = "number"
-    QuestionTypePhone          QuestionType = "phone"
-    QuestionTypeDate           QuestionType = "date"
-    QuestionTypeEmail          QuestionType = "email"
-    QuestionTypeSingleChoice   QuestionType = "single_choice"
-    QuestionTypeMultipleChoice QuestionType = "multiple_choice"
+    QuestionTypeShortText      QuestionType = "SHORT_TEXT"
+    QuestionTypeParagraph      QuestionType = "PARAGRAPH"
+    QuestionTypeBoolean        QuestionType = "BOOLEAN"
+    QuestionTypeNumber         QuestionType = "NUMBER"
+    QuestionTypePhone          QuestionType = "PHONE"
+    QuestionTypeDate           QuestionType = "DATE"
+    QuestionTypeEmail          QuestionType = "EMAIL"
+    QuestionTypeSingleChoice   QuestionType = "SINGLE_CHOICE"
+    QuestionTypeMultipleChoice QuestionType = "MULTIPLE_CHOICE"
 )
 
-// Форма
 type Form struct {
     ID          string      `gorm:"column:id;primaryKey;type:uuid;default:gen_random_uuid()" json:"id"`
     OwnerID     string      `gorm:"column:owner_id;type:uuid;not null;index" json:"ownerId"`
