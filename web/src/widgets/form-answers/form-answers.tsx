@@ -452,6 +452,4 @@ export function FormAnswers({ formId }: FormAnswersProps) {
 }
 FormAnswers.displayName = 'FormAnswers';
 
-// Use memo on the default export if FormAnswers itself is likely to re-render
-// due to parent changes but its props (formId) remain the same.
 export default memo(FormAnswers);

@@ -2,6 +2,7 @@ package users
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/TrySquadDF/formify/api-gql/internal/entity"
 	"github.com/TrySquadDF/formify/api-gql/internal/services/tokens"
@@ -28,18 +29,32 @@ func New(opts Opts) *Service {
 	}
 }
 
-func (c *Service) FindByGoogleID(ctx context.Context, googleID string) (*gomodel.Users, error) {
+// findUserByField - приватный метод для поиска пользователя по заданному полю
+func (c *Service) findUserByField(ctx context.Context, fieldName string, value interface{}) (*gomodel.Users, error) {
     var user gomodel.Users
-    result := c.database.Preload("Token").Where("\"googleId\" = ?", googleID).First(&user)
-    
+    // Используем fmt.Sprintf для безопасного формирования имени поля в запросе
+    // Важно: fieldName должен быть доверенным значением (не из пользовательского ввода напрямую)
+    // чтобы избежать SQL-инъекций. В данном случае "googleId" и "email" безопасны.
+    query := fmt.Sprintf("\"%s\" = ?", fieldName)
+    result := c.database.WithContext(ctx).Preload("Token").Where(query, value).First(&user)
+
     if result.Error != nil {
         if result.Error == gorm.ErrRecordNotFound {
-            return nil, nil
+            return nil, nil // Пользователь не найден, это не ошибка в данном контексте
         }
+        // Возвращаем ошибку базы данных
         return nil, result.Error
     }
-    
+
     return &user, nil
+}
+
+func (c *Service) FindByGoogleID(ctx context.Context, googleID string) (*gomodel.Users, error) {
+    return c.findUserByField(ctx, "googleId", googleID)
+}
+
+func (c *Service) FindUserByEmail(ctx context.Context, email string) (*gomodel.Users, error) {
+    return c.findUserByField(ctx, "email", email)
 }
 
 func (c *Service) CreateUser(ctx context.Context, user entity.Users) (*gomodel.Users, error) {
@@ -55,6 +70,7 @@ func (c *Service) CreateUser(ctx context.Context, user entity.Users) (*gomodel.U
         GoogleID:  user.GoogleID,
         Picture:   user.Picture,
         TokenID:   tokens.ID,
+        PasswordHash: user.PasswordHash,
     }
     
     result := c.database.Create(userModel)

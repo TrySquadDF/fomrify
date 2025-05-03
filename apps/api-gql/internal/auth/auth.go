@@ -6,12 +6,14 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/TrySquadDF/formify/lib/config"
 	model "github.com/TrySquadDF/formify/lib/gomodels"
 	"github.com/alexedwards/scs/goredisstore"
 	"github.com/alexedwards/scs/v2"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
 	"go.uber.org/fx"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -22,11 +24,13 @@ type Opts struct {
 
 	Redis *redis.Client
 	Gorm  *gorm.DB
+	Config config.Config
 }
 
 type Auth struct {
 	sessionManager *scs.SessionManager
 	gorm           *gorm.DB
+	config 		   config.Config
 }
 
 func NewSessions(opts Opts) *Auth {
@@ -39,6 +43,7 @@ func NewSessions(opts Opts) *Auth {
 	return &Auth{
 		sessionManager: sessionManager,
 		gorm:           opts.Gorm,
+		config: 		opts.Config,
 	}
 }
 
@@ -84,3 +89,30 @@ func (s *Auth) Put(ctx context.Context, key string, val interface{}) {
 	s.sessionManager.Put(ctx, key, val)
 	s.sessionManager.Commit(ctx)
 }
+
+func (s *Auth) AuthenticateWithEmailPassword(ctx context.Context, email, password string) (*model.Users, error) {
+    var user model.Users
+    if err := s.gorm.Where("email = ?", email).First(&user).Error; err != nil {
+        return nil, fmt.Errorf("invalid credentials")
+    }
+    
+    if !s.verifyPassword(password, user.PasswordHash) {
+        return nil, fmt.Errorf("invalid credentials")
+    }
+    
+    return &user, nil
+}
+
+func (s *Auth) HashPassword(password string) (string, error) {
+    hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+    if err != nil {
+        return "", err
+    }
+    return string(hash), nil
+}
+
+func (s *Auth) verifyPassword(password, hash string) bool {
+    err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+    return err == nil
+}
+

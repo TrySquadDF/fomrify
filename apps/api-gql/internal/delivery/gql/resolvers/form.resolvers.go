@@ -7,7 +7,6 @@ package resolvers
 import (
 	"context"
 	"errors"
-	"log"
 	"time"
 
 	gqlmodel "github.com/TrySquadDF/formify/api-gql/internal/delivery/gql/graph/model"
@@ -537,12 +536,11 @@ func (r *queryResolver) Form(ctx context.Context, id string) (*gqlmodel.Form, er
         return nil, err
     }
 
-	log.Printf("Form: %v", form.Access)
     if form.Access == gomodel.FormAccessPrivate {
         userID, err := r.deps.Sessions.GetUserIDFromContext(ctx)
 
         if err != nil || userID != form.OwnerID {
-            return nil, errors.New("not authorized to access this private form")
+            return nil, errors.New("access denied")
         }
     }
 
@@ -552,7 +550,6 @@ func (r *queryResolver) Form(ctx context.Context, id string) (*gqlmodel.Form, er
 func (r *queryResolver) Forms(ctx context.Context, ownerID *string, access *gqlmodel.FormAccess) ([]*gqlmodel.Form, error) {
 	query := r.deps.Gorm.Model(&gomodel.Form{}).Preload("Questions.Options")
 
-	// Apply filters
 	if ownerID != nil {
 		query = query.Where("owner_id = ?", *ownerID)
 	}

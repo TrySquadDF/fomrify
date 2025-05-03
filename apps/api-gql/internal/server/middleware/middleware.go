@@ -20,3 +20,6 @@ func New(opts Opts) *Middleware {
 type Middleware struct {
 	sessions *auth.Auth
 }
+
+
+

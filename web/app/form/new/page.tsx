@@ -95,7 +95,6 @@ const ACCESS_TYPE_LABELS: Record<AccessTypeValue, string> = {
   [ACCESS_TYPES.BY_LINK]: 'По ссылке',
 };
 
-// --- Helper Functions ---
 
 const mapClientTypeToApiType = (type: QuestionTypeValue): QuestionType => {
   const typeMap: Record<QuestionTypeValue, QuestionType> = {
@@ -116,7 +115,6 @@ const questionTypeHasOptions = (type: QuestionTypeValue | undefined): boolean =>
   return type === QUESTION_TYPES.SINGLE_CHOICE || type === QUESTION_TYPES.MULTIPLE_CHOICE;
 };
 
-// --- Zod Schema ---
 
 const optionSchema = z.object({
   text: z.string().min(1, 'Текст варианта обязателен'),
@@ -407,8 +405,8 @@ export default function NewFormPage() {
     try {
       const formInput: FormInput = {
         title: data.title,
-        description: data.description || '', // Ensure description is not undefined
-        access: data.access as FormAccess, // Cast is okay due to zod enum validation
+        description: data.description || '',
+        access: data.access as FormAccess,
         questions: data.questions.map((q, index): QuestionInput => {
           const options: OptionInput[] = (questionTypeHasOptions(q.type) && q.options)
             ? q.options.map((opt, optIndex) => ({

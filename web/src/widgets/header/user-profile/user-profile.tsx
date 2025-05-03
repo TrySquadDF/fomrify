@@ -3,7 +3,6 @@
 import { FC } from "react"
 import { Profile } from "../ui/profile"
 import { useAuthContext } from "@/src/processes/auth/model/authContext"
-import { GButton } from "../ui/g-button"
 import Link from "next/link"
 import {
   DropdownMenu,
@@ -14,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
+import { AuthModal } from "../ui/auth-modal"
 
 
 const USER_NAVIGATION_LINKS = [{
@@ -22,14 +22,19 @@ const USER_NAVIGATION_LINKS = [{
 }]
 
 export const UserProfile: FC = () => {
-    const { isAuthenticated, loading, user, login, logout } = useAuthContext()
+    const { isAuthenticated, loading, user, logout } = useAuthContext()
 
     if (loading) {
         return <Profile.Skeleton />
     }
 
     if (!isAuthenticated) {
-        return <div className="flex"><GButton onClick={login} /></div>
+        return <div className="flex">
+            <AuthModal
+              initialView="login"
+              trigger={<Button variant="outline">Войти</Button>}
+            />
+        </div>
     }
 
     return (

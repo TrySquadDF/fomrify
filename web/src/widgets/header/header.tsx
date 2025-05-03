@@ -2,8 +2,6 @@ import Link from "next/link"
 import { UserProfile } from "./user-profile/user-profile"
 
 export const Header = ()=>{
-    
-
     return <header className="flex h-16 items-center px-4 justify-between border-b-1">
        <Link href="/">
             <svg width="107" height="31" viewBox="0 0 107 31" fill="none" xmlns="http://www.w3.org/2000/svg">

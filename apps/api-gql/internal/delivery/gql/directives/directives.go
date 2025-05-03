@@ -24,3 +24,5 @@ type Directives struct {
 	sessions *auth.Auth
 	gorm     *gorm.DB
 }
+
+

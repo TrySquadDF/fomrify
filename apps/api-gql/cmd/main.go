@@ -18,6 +18,7 @@ import (
 	"github.com/TrySquadDF/formify/api-gql/internal/delivery/gql"
 	"github.com/TrySquadDF/formify/api-gql/internal/delivery/gql/directives"
 	"github.com/TrySquadDF/formify/api-gql/internal/delivery/gql/resolvers"
+	mauth "github.com/TrySquadDF/formify/api-gql/internal/delivery/http/auth"
 	"github.com/TrySquadDF/formify/api-gql/internal/delivery/http/oauth2"
 	"github.com/TrySquadDF/formify/api-gql/internal/server"
 
@@ -122,6 +123,7 @@ func main() {
 		fx.Invoke(
 			gql.New,
 			oauth2.New,
+			mauth.New,
 		),
 	)
 

@@ -190,7 +190,6 @@ const FormSkeleton = memo(() => (
 ));
 FormSkeleton.displayName = 'FormSkeleton';
 
-// --- Error Display ---
 interface FormErrorProps {
     error: Error;
 }
@@ -231,37 +230,27 @@ FormSuccessDisplay.displayName = 'FormSuccessDisplay';
 export default function FormView({ formId }: FormViewProps) {
   const { data, error, loading } = useGetFormById(formId);
 
-  // Use optional chaining and nullish coalescing for safer access
-  // Ensure questions is always an array (potentially empty) for easier handling downstream
   const gqlForm: GQLForm | null = useMemo(() => data?.form ?? ({} as GQLForm), [data]);
   const questions: ReadonlyArray<Question> = useMemo(() => gqlForm?.questions ?? [], [gqlForm]);
 
-  // Memoize schema and default values based on the questions array
-  // Pass the potentially empty but defined questions array
   const formSchema = useMemo(() => buildFormSchema(questions), [questions]);
   const defaultValues = useMemo(() => buildDefaultValues(questions), [questions]);
 
-  // Infer the type of the form values from the generated schema
   type FormValues = z.infer<typeof formSchema>;
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: defaultValues as Partial<FormValues>, // Cast needed because buildDefaultValues returns a wider type than Zod infers initially
+    defaultValues: defaultValues as Partial<FormValues>,
     mode: 'onBlur', // Validate on blur
   });
 
-
-  // Memoize sorted questions - ensure sorting happens only when questions change
   const sortedQuestions = useMemo(() =>
     [...questions].sort((a, b) => a.order - b.order),
     [questions]
   );
 
-  // Pass the potentially null gqlForm to the hook.
-  // The hook itself MUST handle the null case internally to prevent crashes.
   const { submitForm, isSubmitting, submitted } = useFormSubmission({ form: gqlForm });
 
-  // Use useCallback for the submit handler to prevent unnecessary re-renders
   const onSubmit: SubmitHandler<FormValues> = useCallback(
       async (values) => {
           if (gqlForm) {
@@ -278,17 +267,14 @@ export default function FormView({ formId }: FormViewProps) {
     return <FormSkeleton />;
   }
 
-  // Handle fetch error OR case where form data is unexpectedly null
   if (error || !gqlForm) {
     return <FormErrorDisplay error={error || new Error("Данные формы не найдены.")} />;
   }
 
-  // Show success message after submission
   if (submitted) {
     return <FormSuccessDisplay title={gqlForm.title} />;
   }
 
-  // Render the main form
   return (
     <div className="container max-w-3xl">
       <div>

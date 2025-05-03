@@ -31,14 +31,14 @@ func New(opts GoogleOpts, cfg config.Config, gcfg google.GoogleConfig) {
 
 		token, err := gcfg.Exchange(ctx.Request.Context(), code)
 		if err != nil {
-			ctx.String(http.StatusBadRequest, "Failed to exchange token")
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Failed to exchange token"})
 			return
 		}
 
 		client := gcfg.Client(ctx.Request.Context(), token)
 		resp, err := client.Get(google.GoogleUserEndpoint.UserInfoV3)
 		if err != nil {
-			ctx.String(http.StatusBadRequest, "Failed to get user info")
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Failed to get user info"})
 			return
 		}
 
@@ -46,13 +46,13 @@ func New(opts GoogleOpts, cfg config.Config, gcfg google.GoogleConfig) {
 
 		ud, err := google.UnmarshalUserData(resp.Body)
 		if err != nil {
-			ctx.String(http.StatusInternalServerError, "Failed to decode user info")
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to unmarshal user data"})
 			return
 		}
 
 		user, err := opts.UserService.FindByGoogleID(ctx.Request.Context(), ud.Sub)
 		if err != nil {
-			ctx.String(http.StatusInternalServerError, "Failed to find user")
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to find user"})
 			return
 		}
 
@@ -64,7 +64,7 @@ func New(opts GoogleOpts, cfg config.Config, gcfg google.GoogleConfig) {
 				GoogleID:    ud.Sub,
 			})
 			if err != nil {
-				ctx.String(http.StatusInternalServerError, "Failed to create user")
+				ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
 				return
 			}
 

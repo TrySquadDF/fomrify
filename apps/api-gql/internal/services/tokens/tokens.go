@@ -46,7 +46,6 @@ func (c *Service) Create(ctx context.Context, ID string) (*model.Tokens, error) 
         return nil, err
     }
 
-    // Создаем запись токена через GORM
     token := &model.Tokens{
         AccessToken:         accessToken,
         RefreshToken:        refreshToken,
