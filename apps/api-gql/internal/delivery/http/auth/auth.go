@@ -34,7 +34,6 @@ type LoginRequest struct {
 }
 
 func New(opts AuthOpts, cfg config.Config) {
-    // Регистрация пользователя
     opts.Server.POST("/auth/register", func(ctx *gin.Context) {
         var req RegisterRequest
         if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -54,22 +53,21 @@ func New(opts AuthOpts, cfg config.Config) {
             return
         }
 
-        user := entity.Users{
+        createdUser, err := opts.UserService.CreateUser(ctx.Request.Context(), entity.Users{
             ID:          uuid.New().String(),
             Email:       req.Email,
             DisplayName: req.DisplayName,
             PasswordHash: passwordHash,
-        }
+        })
 
-        createdUser, err := opts.UserService.CreateUser(ctx.Request.Context(), user)
+
         if err != nil {
             ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
             return
         }
 
-
         opts.Auth.Put(ctx.Request.Context(), "dbUser", *createdUser)
-        ctx.JSON(http.StatusOK, gin.H{"success": true})
+        ctx.JSON(http.StatusOK, gin.H{"redirect": true})
     })
 
     opts.Server.POST("/auth/login", func(ctx *gin.Context) {
@@ -86,6 +84,20 @@ func New(opts AuthOpts, cfg config.Config) {
         }
         
         opts.Auth.Put(ctx.Request.Context(), "dbUser", *user)
-        ctx.JSON(http.StatusOK, gin.H{"success": true})
+        ctx.JSON(http.StatusOK, gin.H{"data": entity.UserInfo{
+            ID:          user.ID,
+            Email:       user.Email,
+            DisplayName: user.DisplayName,
+            Picture:     user.Picture,
+            IsBanned:    user.IsBanned,
+            GoogleID:    user.GoogleID,
+            Forms:       user.Forms,
+        }})
     })
+
+    opts.Server.GET("/auth/session", func(ctx *gin.Context) {
+		user, _ := opts.Auth.GetAuthenticatedUser(ctx.Request.Context())
+		ctx.JSON(http.StatusOK, gin.H{"data": user})
+	})
+
 }

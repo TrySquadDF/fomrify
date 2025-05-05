@@ -36,7 +36,7 @@ func (c *Service) findUserByField(ctx context.Context, fieldName string, value i
     // Важно: fieldName должен быть доверенным значением (не из пользовательского ввода напрямую)
     // чтобы избежать SQL-инъекций. В данном случае "googleId" и "email" безопасны.
     query := fmt.Sprintf("\"%s\" = ?", fieldName)
-    result := c.database.WithContext(ctx).Preload("Token").Where(query, value).First(&user)
+    result := c.database.WithContext(ctx).Preload("Token").Preload("Forms").Where(query, value).First(&user)
 
     if result.Error != nil {
         if result.Error == gorm.ErrRecordNotFound {

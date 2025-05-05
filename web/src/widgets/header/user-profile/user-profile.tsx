@@ -2,7 +2,6 @@
 
 import { FC } from "react"
 import { Profile } from "../ui/profile"
-import { useAuthContext } from "@/src/processes/auth/model/authContext"
 import Link from "next/link"
 import {
   DropdownMenu,
@@ -14,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { AuthModal } from "../ui/auth-modal"
+import { useUserSession } from "@/src/processes/auth/model/useUserSession"
 
 
 const USER_NAVIGATION_LINKS = [{
@@ -22,7 +22,7 @@ const USER_NAVIGATION_LINKS = [{
 }]
 
 export const UserProfile: FC = () => {
-    const { isAuthenticated, loading, user, logout } = useAuthContext()
+    const { isAuthenticated, loading, user, logout } = useUserSession()
 
     if (loading) {
         return <Profile.Skeleton />
@@ -35,6 +35,10 @@ export const UserProfile: FC = () => {
               trigger={<Button variant="outline">Войти</Button>}
             />
         </div>
+    }
+
+    if(!user) {
+        return null
     }
 
     return (

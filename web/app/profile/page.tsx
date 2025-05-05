@@ -1,19 +1,20 @@
 'use client';
 import { useGetMyForms } from "@/src/api/getMyForms";
-import { useUpdateFormAccess } from "@/src/api/updateFormAccess"; // Импортируем хук для обновления доступа
-import { FormCard } from "@/src/shared/ui/form-card";
+import { useUpdateFormAccess } from "@/src/api/updateFormAccess";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, ClipboardList, LoaderIcon } from "lucide-react";
 import Link from "next/link";
 import { FormAccess } from "@/src/gql/graphql";
 import { useDeleteForm } from "@/src/api/deleteForm";
+import { FormList } from "@/src/widgets/form-list/forms-view";
+import { useMemo } from "react";
 
 export default function Profile() {
     const { data, loading, refetch } = useGetMyForms();
-    const {updateFormAccess} = useUpdateFormAccess();
+    const { updateFormAccess } = useUpdateFormAccess();
     const { deleteForm } = useDeleteForm();
 
-    const forms = data?.me?.forms || [];
+    const forms = useMemo(()=>  data?.me?.forms || [], [data]);
 
     const handleUpdateAccess = async (formId: string, newAccess: "PUBLIC" | "PRIVATE") => {
         try {
@@ -73,24 +74,7 @@ export default function Profile() {
                     </Link>
                 </div>
             )}
-            {!loading && forms.length > 0 && (
-                <div className="space-y-4">
-                    {forms.map((form) => (
-                        <FormCard 
-                            key={form.id}
-                            id={form.id}
-                            title={form.title} 
-                            description={form.description}
-                            access={form.access}
-                            createdAt={form.createdAt}
-                            updatedAt={form.updatedAt}
-                            className="flex-row w-full"
-                            onUpdateAccess={handleUpdateAccess}
-                            onDelete={handleDelete}
-                        />
-                    ))}
-                </div>
-            )}
+            <FormList forms={forms} onDelete={handleDelete} onUpdateAccess={handleUpdateAccess} />
         </div>
     );
 }

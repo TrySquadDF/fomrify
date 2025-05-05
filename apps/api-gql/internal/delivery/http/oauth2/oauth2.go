@@ -76,11 +76,6 @@ func New(opts GoogleOpts, cfg config.Config, gcfg google.GoogleConfig) {
 		ctx.Redirect(http.StatusTemporaryRedirect, "https://localhost:3000")
 	})
 
-	opts.Server.GET("/auth/check", func(ctx *gin.Context) {
-		user := opts.Auth.Get(ctx.Request.Context(), "dbUser")
-		ctx.JSON(http.StatusOK, gin.H{"authenticated": true, "user": user})
-	})
-
 	opts.Server.GET("/logout", func(ctx *gin.Context) {
 		opts.Auth.SessionLogout(ctx.Request.Context())
 		ctx.Redirect(http.StatusTemporaryRedirect, cfg.SiteBaseUrl)

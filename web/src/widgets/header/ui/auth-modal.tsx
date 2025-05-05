@@ -11,26 +11,22 @@ import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
-  // DialogDescription, // Не используется
   DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  // DialogClose, // Не используется явно
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import {
   Form,
-  // FormControl, // Убираем FormControl
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { useAuthContext } from '@/src/processes/auth/model/authContext';
-import { GButton } from '@/src/widgets/header/ui/g-button'; // Убедитесь, что путь правильный
+import { GButton } from '@/src/widgets/header/ui/g-button';
+import { useUserSession } from '@/src/processes/auth/model/useUserSession';
 
-// --- Schemas ---
 const loginSchema = z.object({
   email: z.string().email({ message: 'Неверный формат email.' }),
   password: z.string().min(6, { message: 'Пароль должен быть не менее 6 символов.' }),
@@ -44,7 +40,6 @@ const registrationSchema = z.object({
 });
 type RegistrationValues = z.infer<typeof registrationSchema>;
 
-// --- Component Props ---
 interface AuthModalProps {
   trigger?: React.ReactNode;
   initialView?: 'login' | 'register';
@@ -55,10 +50,9 @@ export function AuthModal({ trigger, initialView = 'login', onSuccess }: AuthMod
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
   const [isLoginView, setIsLoginView] = React.useState<boolean>(initialView === 'login');
   const [isSubmitting, setIsSubmitting] = React.useState<boolean>(false);
-  const { emailLogin, register, login: googleLogin } = useAuthContext();
+  const { emailLogin, register, login: googleLogin } = useUserSession();
   const router = useRouter();
 
-  // --- Form Hooks ---
   const loginForm = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: '', password: '' },
@@ -71,18 +65,15 @@ export function AuthModal({ trigger, initialView = 'login', onSuccess }: AuthMod
     mode: 'onSubmit',
   });
 
-  // --- Handlers ---
   const handleSuccess = React.useCallback(() => {
     toast.success(isLoginView ? 'Вход выполнен успешно!' : 'Регистрация прошла успешно!');
     setIsOpen(false);
     if (onSuccess) {
       onSuccess();
     } else {
-      // Можно перезагрузить для обновления состояния или использовать router.refresh() в Next.js 13+ App Router
-      window.location.reload(); // Простой вариант для перезагрузки
-      // router.push('/'); // Альтернатива: редирект на главную
+      router.refresh()
     }
-  }, [isLoginView, onSuccess, router]); // Добавили isLoginView в зависимости
+  }, [isLoginView, onSuccess, router]);
 
   const handleError = React.useCallback((error: unknown, formType: 'login' | 'register' | 'google') => {
     const defaultMessage =
@@ -97,7 +88,7 @@ export function AuthModal({ trigger, initialView = 'login', onSuccess }: AuthMod
       formToUse.setError("root.apiError", { type: "manual", message: errorMessage });
     }
     console.error(`${formType} error:`, error);
-  }, [loginForm, registrationForm]); // Добавили формы в зависимости
+  }, [loginForm, registrationForm]); 
 
   const handleEmailLogin = React.useCallback(
     async (values: LoginValues) => {
@@ -121,9 +112,7 @@ export function AuthModal({ trigger, initialView = 'login', onSuccess }: AuthMod
       registrationForm.clearErrors();
       try {
         await register(values.email, values.password, values.displayName);
-        // После успешной регистрации можно переключить на вид логина или сразу залогинить
-        // setIsLoginView(true); // Переключить на логин
-        handleSuccess(); // Или сразу считать успехом
+        handleSuccess();
       } catch (err: unknown) {
         handleError(err, 'register');
       } finally {
@@ -137,27 +126,23 @@ export function AuthModal({ trigger, initialView = 'login', onSuccess }: AuthMod
     setIsSubmitting(true);
     try {
       await googleLogin();
-      // Успех обычно обрабатывается через редирект и обновление сессии
     } catch (err: unknown) {
       handleError(err, 'google');
-      setIsSubmitting(false); // Сброс только при ошибке, т.к. при успехе будет редирект
+      setIsSubmitting(false);
     }
   }, [googleLogin, handleSuccess, handleError]);
 
-  // --- View Toggle ---
   const toggleView = React.useCallback(() => {
     setIsLoginView((prev) => !prev);
     loginForm.reset();
     registrationForm.reset();
     loginForm.clearErrors();
     registrationForm.clearErrors();
-  }, [loginForm, registrationForm]); // Добавили формы в зависимости
+  }, [loginForm, registrationForm]);
 
-  // --- Reset on Close ---
    const onOpenChange = React.useCallback((open: boolean) => {
      setIsOpen(open);
      if (!open) {
-       // Небольшая задержка перед сбросом, чтобы анимация закрытия успела пройти
        setTimeout(() => {
          loginForm.reset();
          registrationForm.reset();
@@ -165,11 +150,10 @@ export function AuthModal({ trigger, initialView = 'login', onSuccess }: AuthMod
          setIsSubmitting(false);
          loginForm.clearErrors();
          registrationForm.clearErrors();
-       }, 150); // 150ms - примерная длительность анимации Dialog
+       }, 150);
      }
-   }, [initialView, loginForm, registrationForm]); // Добавили зависимости
+   }, [initialView, loginForm, registrationForm]);
 
-   // --- Render Trigger Safely ---
    const renderTrigger = () => {
      if (!trigger) return null;
      if (React.isValidElement(trigger)) {

@@ -3,6 +3,7 @@ const ENDPOINTS =  {
     'logout': 'logout',
     'emailLogin': 'auth/login',
     'register': 'auth/register',
+    'session': 'auth/session',
 } as const;
 
 export const ROOT_ENDPOINT = process.env.NEXT_PUBLIC_API_URL || "https://localhost:8080"

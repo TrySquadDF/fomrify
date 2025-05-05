@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/TrySquadDF/formify/api-gql/internal/services/users"
 	"github.com/TrySquadDF/formify/lib/config"
 	model "github.com/TrySquadDF/formify/lib/gomodels"
 	"github.com/alexedwards/scs/goredisstore"
@@ -24,10 +25,14 @@ type Opts struct {
 
 	Redis *redis.Client
 	Gorm  *gorm.DB
+
+	UserService *users.Service
 	Config config.Config
 }
 
 type Auth struct {
+
+	userService    *users.Service
 	sessionManager *scs.SessionManager
 	gorm           *gorm.DB
 	config 		   config.Config
@@ -41,6 +46,7 @@ func NewSessions(opts Opts) *Auth {
 	gob.Register(model.Users{})
 
 	return &Auth{
+		userService:    opts.UserService,
 		sessionManager: sessionManager,
 		gorm:           opts.Gorm,
 		config: 		opts.Config,
@@ -91,16 +97,16 @@ func (s *Auth) Put(ctx context.Context, key string, val interface{}) {
 }
 
 func (s *Auth) AuthenticateWithEmailPassword(ctx context.Context, email, password string) (*model.Users, error) {
-    var user model.Users
-    if err := s.gorm.Where("email = ?", email).First(&user).Error; err != nil {
-        return nil, fmt.Errorf("invalid credentials")
-    }
+    user, err := s.userService.FindUserByEmail(ctx, email)
+	if err != nil {
+		return nil, err
+	}
     
     if !s.verifyPassword(password, user.PasswordHash) {
         return nil, fmt.Errorf("invalid credentials")
     }
     
-    return &user, nil
+    return user, nil
 }
 
 func (s *Auth) HashPassword(password string) (string, error) {
