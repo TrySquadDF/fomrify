@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Header } from "@/src/widgets/header/header";
 import { AuthProvider } from "@/src/processes/auth/model/authProvider";
 import { ApolloWrapper } from "@/lib/apollo-wrapper";
+import { Toaster } from "@/components/ui/sonner"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,6 +35,7 @@ export default function RootLayout({
           >
             <Header />
             {children}
+            <Toaster />
           </body>
         </html>
       </AuthProvider>

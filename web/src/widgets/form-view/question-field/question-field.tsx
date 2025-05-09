@@ -358,7 +358,8 @@ const QuestionField = React.memo(({ question, form }: QuestionFieldProps) => {
   const InputComponent = QuestionInputComponents[question.type];
 
   // Render function for react-hook-form's FormField
-  const renderFormField = ({ field }: { field: ControllerRenderProps<FieldValues, string> }) => {
+  const renderFormField =
+      ({ field }: { field: ControllerRenderProps<FieldValues, string> }) => {
     // Props needed by choice components
     const choiceProps = { options: sortedOptions };
 

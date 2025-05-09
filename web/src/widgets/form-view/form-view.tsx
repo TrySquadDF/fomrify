@@ -33,9 +33,9 @@ type ZodSchemaShape = Record<string, z.ZodTypeAny>;
 /**
  * Builds a Zod schema dynamically based on the form questions.
  */
-const buildFormSchema = (questions: ReadonlyArray<Question> | null | undefined): z.ZodObject<ZodSchemaShape, "strip", z.ZodTypeAny, z.ZodRawShape, z.ZodRawShape> => {
+const buildFormSchema =
+    (questions: ReadonlyArray<Question> | null | undefined): z.ZodObject<ZodSchemaShape, "strip", z.ZodTypeAny, z.ZodRawShape, z.ZodRawShape> => {
   if (!questions || questions.length === 0) {
-    // Return an empty object schema if there are no questions
     return z.object({});
   }
 
@@ -241,7 +241,7 @@ export default function FormView({ formId }: FormViewProps) {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: defaultValues as Partial<FormValues>,
-    mode: 'onBlur', // Validate on blur
+    mode: 'onChange', // Validate on blur
   });
 
   const sortedQuestions = useMemo(() =>

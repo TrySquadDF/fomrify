@@ -82,7 +82,8 @@ export function useFormSubmission({ form, onSuccess, onError }: UseFormSubmissio
       
       return answer;
     }).filter((answer): answer is AnswerInput => answer !== null);
-  }, [form.questions]);
+  },
+      [form.questions]);
 
   const submitForm = useCallback(async (values: FormValues) => {
     setIsSubmitting(true);
@@ -122,11 +123,9 @@ export function useFormSubmission({ form, onSuccess, onError }: UseFormSubmissio
     } finally {
       setIsSubmitting(false);
     }
-  }, [form.id, transformFormValues, submitFormResponse, onSuccess, onError]);
+  },
+      [form.id, transformFormValues, submitFormResponse, onSuccess, onError]);
 
-  /**
-   * Сбрасывает состояние отправки формы
-   */
   const resetSubmission = useCallback(() => {
     setSubmitted(false);
   }, []);

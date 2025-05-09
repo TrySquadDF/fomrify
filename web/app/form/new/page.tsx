@@ -124,14 +124,13 @@ const questionSchema = z.object({
   text: z.string().min(1, 'Текст вопроса обязателен'),
   type: z.nativeEnum(QUESTION_TYPES).default(QUESTION_TYPES.SHORT_TEXT),
   required: z.boolean().default(false),
-  // Options are only required if the type necessitates them, but Zod schema handles optionality
   options: z.array(optionSchema).optional(),
 });
 
 const formSchema = z.object({
   title: z.string().min(1, 'Название формы обязательно'),
   description: z.string().optional(),
-  access: z.nativeEnum(ACCESS_TYPES), // required, not optional, but has default in defaultValues
+  access: z.nativeEnum(ACCESS_TYPES),
   questions: z.array(questionSchema).min(1, 'Добавьте хотя бы один вопрос'),
 });
 

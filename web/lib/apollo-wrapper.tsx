@@ -8,7 +8,7 @@ import {
 } from "@apollo/client-integration-nextjs";
 
 function makeClient() {
-    const httpLink = new HttpLink({ uri: 'https://localhost:8080/query', credentials: 'include' });
+    const httpLink = new HttpLink({ uri: process.env.NEXT_PUBLIC_GRAPHQL_API_URL, credentials: 'include' });
 
     return  new ApolloClient({
         link: httpLink,
