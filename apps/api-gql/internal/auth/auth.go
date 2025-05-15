@@ -101,6 +101,10 @@ func (s *Auth) AuthenticateWithEmailPassword(ctx context.Context, email, passwor
 	if err != nil {
 		return nil, err
 	}
+
+	if user == nil { 
+		return nil , fmt.Errorf("user not found")
+	}
     
     if !s.verifyPassword(password, user.PasswordHash) {
         return nil, fmt.Errorf("invalid credentials")

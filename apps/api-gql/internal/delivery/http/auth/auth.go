@@ -22,14 +22,14 @@ type AuthOpts struct {
 }
 
 type RegisterRequest struct {
-	Email       string `json:"email" binding:"required,email"`
-	Password    string `json:"password" binding:"required,min=6"`
-	DisplayName string `json:"displayName" binding:"required"`
+    Email       string `json:"email" binding:"required,email,min=5"`
+    Password    string `json:"password" binding:"required,min=6"`
+    DisplayName string `json:"displayName" binding:"required"`
 }
 
 type LoginRequest struct {
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required"`
+    Email       string `json:"email" binding:"required,email,min=5"`
+    Password    string `json:"password" binding:"required,min=6"`
 }
 
 func New(opts AuthOpts, cfg config.Config) {
@@ -76,7 +76,7 @@ func New(opts AuthOpts, cfg config.Config) {
 		}
 
 		user, err := opts.Auth.AuthenticateWithEmailPassword(ctx.Request.Context(), req.Email, req.Password)
-		if err != nil {
+		if (err != nil || user == nil) {
 			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
 			return
 		}

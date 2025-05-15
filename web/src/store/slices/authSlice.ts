@@ -137,7 +137,6 @@ const authSlice = createSlice({
       state.error = action.payload as string;
     });
 
-    // register
     builder.addCase(register.pending, (state) => {
       state.loading = true;
       state.error = null;
@@ -156,7 +155,7 @@ const authSlice = createSlice({
     });
     builder.addCase(session.fulfilled, (state) => {
       state.loading = false;
-      state.isAuthenticated = false;
+      state.isAuthenticated = true;
       state.user = null;
     });
     builder.addCase(session.rejected, (state, action) => {
@@ -167,7 +166,6 @@ const authSlice = createSlice({
     });
 
 
-    // logout
     builder.addCase(logout.pending, (state) => {
       state.loading = true;
       state.error = null;

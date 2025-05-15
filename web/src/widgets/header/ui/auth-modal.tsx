@@ -30,7 +30,7 @@ export function AuthModal({ trigger, initialView = 'login', onSuccess }: AuthMod
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
   const [isLoginView, setIsLoginView] = React.useState<boolean>(initialView === 'login');
   const [isSubmitting, setIsSubmitting] = React.useState<boolean>(false);
-  const { emailLogin, register: registerUser, login: googleLogin } = useUserSession();
+  const { emailLogin, register: registerUser, login: googleLogin, error } = useUserSession();
   const router = useRouter();
 
   const loginForm = useForm<LoginValues>({
@@ -46,6 +46,11 @@ export function AuthModal({ trigger, initialView = 'login', onSuccess }: AuthMod
   });
 
   const handleSuccess = React.useCallback(() => {
+    if(error) { 
+      handleError(error, 'login')
+      return
+    }
+
     toast.success(isLoginView ? 'Вход выполнен успешно!' : 'Регистрация прошла успешно!');
     setIsOpen(false);
     if (onSuccess) {
@@ -80,8 +85,6 @@ export function AuthModal({ trigger, initialView = 'login', onSuccess }: AuthMod
         handleSuccess();
       } catch (err: unknown) {
         handleError(err, 'login');
-      } finally {
-        setIsSubmitting(false);
       }
     },
     [emailLogin, loginForm, handleSuccess, handleError]
